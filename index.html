@@ -294,6 +294,7 @@
     .pl-main svg{width:20px;height:20px}
     input[type="range"]{width:100%;accent-color:var(--primary);height:22px}
     .pl-error{font-size:.82rem;color:var(--danger)}
+    .pl-error.info{color:var(--muted)}
 
     /* navegación inferior */
     .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--surface);border-top:1px solid var(--border);
@@ -855,7 +856,7 @@
   }
 
   async function fetchEpisodes(query) {
-    const key = 'ep4:' + norm(query);
+    const key = 'ep5:' + norm(query);
     const hit = cache.get(key);
     if (hit) return hit;
     const urls = ['es', 'mx'].map(c => 'https://itunes.apple.com/search?' + new URLSearchParams({ term: query, media:'podcast', entity:'podcastEpisode', country: c, limit:'30' }));
@@ -866,6 +867,9 @@
     for (const r of ok) for (const it of (r.value.results || [])) {
       const audio = safeUrl(it.episodeUrl);
       if (!audio) continue;
+      // Solo audio: los feeds de video (por ejemplo las charlas TED subtituladas) traen título en castellano
+      // pero el audio original en inglés, y además gastan muchos más datos.
+      if ((it.episodeContentType && it.episodeContentType !== 'audio') || /^(mp4|m4v|mov|webm)$/i.test(it.episodeFileExtension || '')) continue;
       const dupe = norm(it.trackName) + '|' + norm(it.collectionName);
       if (seen.has(it.trackId) || seen.has(dupe)) continue;
       seen.add(it.trackId); seen.add(dupe);
@@ -1187,22 +1191,71 @@
 
   const audio = new Audio();
   audio.preload = 'metadata';
+  audio.hidden = true;
+  document.body.appendChild(audio);
   let nowPlaying = null;
   let lastPosSave = 0;
+  let pendingSeek = 0;
   const posKey = id => 'rlw.pos.' + id;
 
+  // Reconexión: con datos móviles la descarga del audio se corta seguido. En vez de rendirse, se vuelve
+  // a pedir el archivo y se sigue desde el último segundo que sonó.
+  const MAX_RETRIES = 6;
+  const rec = { tries: 0, lastGood: 0, okFrom: 0, timer: null, stall: null };
+  const srcFor = e => e.useHttps ? e.audio.replace(/^http:/, 'https:') : e.audio;
+  function clearRecovery() { clearTimeout(rec.timer); clearTimeout(rec.stall); rec.timer = rec.stall = null; rec.tries = 0; }
+  function playerMsg(html, kind) {
+    const el = $('#pl-error');
+    el.innerHTML = html;
+    el.hidden = !html;
+    el.classList.toggle('info', kind === 'info');
+    setPlayerHeight();
+  }
+  function reconnect(now) {
+    const e = nowPlaying;
+    if (!e) return;
+    clearTimeout(rec.timer);
+    playerMsg(`Se cortó la conexión. Reconectando${rec.tries > 1 ? ` (intento ${rec.tries} de ${MAX_RETRIES})` : ''}…`, 'info');
+    rec.timer = setTimeout(() => {
+      rec.timer = null;
+      if (nowPlaying !== e) return;
+      pendingSeek = Math.max(0, rec.lastGood - 2);
+      rec.okFrom = pendingSeek;
+      audio.src = srcFor(e);
+      audio.playbackRate = S.rate || 1;
+      audio.play().catch(onPlayError);
+    }, now ? 0 : Math.min(1500 * rec.tries, 6000));
+  }
+  function handleFailure() {
+    const e = nowPlaying;
+    if (!e || rec.timer) return;
+    // Si nunca llegó a sonar y la dirección es http, se prueba la versión segura.
+    if (!rec.lastGood && e.audio.startsWith('http:') && !e.useHttps) e.useHttps = true;
+    if (rec.tries >= (rec.lastGood ? MAX_RETRIES : 2)) {
+      playerMsg(`No se pudo reproducir este episodio acá.${e.page ? ` <a href="${esc(e.page)}" target="_blank" rel="noopener noreferrer">Abrirlo en Apple Podcasts</a>.` : ''}`, 'error');
+      return;
+    }
+    rec.tries++;
+    reconnect(false);
+  }
+  function togglePlay() {
+    if (!nowPlaying) return;
+    // Después de un corte, tocar reproducir vuelve a conectar desde donde quedó.
+    if (audio.error || rec.timer) { rec.tries = 0; reconnect(true); return; }
+    audio.paused ? audio.play().catch(onPlayError) : audio.pause();
+  }
+
   function playEpisode(e) {
-    if (nowPlaying && nowPlaying.id === e.id) { audio.paused ? audio.play().catch(onPlayError) : audio.pause(); return; }
+    if (nowPlaying && nowPlaying.id === e.id) { togglePlay(); return; }
     nowPlaying = e;
-    $('#pl-error').hidden = true;
-    audio.src = e.audio;
-    audio.playbackRate = S.rate || 1;
+    clearRecovery();
+    rec.lastGood = 0;
+    playerMsg('');
     let resume = 0;
     try { resume = +localStorage.getItem(posKey(e.id)) || 0; } catch (err) { console.debug('rlw: posición', err); }
-    audio.addEventListener('loadedmetadata', function once() {
-      audio.removeEventListener('loadedmetadata', once);
-      if (resume > 5 && resume < audio.duration - 10) { audio.currentTime = resume; toast('Seguís desde ' + fmtTime(resume)); }
-    });
+    pendingSeek = resume > 5 ? resume : 0;
+    audio.src = srcFor(e);
+    audio.playbackRate = S.rate || 1;
     audio.play().catch(onPlayError);
     $('#pl-title').textContent = e.t;
     $('#pl-show').textContent = e.show;
@@ -1220,19 +1273,31 @@
     // El navegador bloqueó el inicio automático: queda en pausa hasta que la persona toque reproducir.
     if (err && err.name === 'NotAllowedError') { refreshEpButtons(); return; }
     console.debug('rlw: reproducir', err);
-    const e = nowPlaying;
-    if (e && e.audio.startsWith('http:') && !e.triedHttps) {
-      e.triedHttps = true;
-      audio.src = e.audio.replace(/^http:/, 'https:');
-      audio.play().catch(onPlayError);
-      return;
-    }
-    const el = $('#pl-error');
-    el.innerHTML = `No se pudo reproducir este episodio acá.${e && e.page ? ` <a href="${esc(e.page)}" target="_blank" rel="noopener noreferrer">Abrirlo en Apple Podcasts</a>.` : ''}`;
-    el.hidden = false;
-    setPlayerHeight();
+    handleFailure();
   }
-  audio.addEventListener('error', () => { if (audio.src) onPlayError(audio.error); });
+  audio.addEventListener('error', () => {
+    if (!nowPlaying || !audio.getAttribute('src')) return;
+    console.debug('rlw: error de audio', audio.error && audio.error.code);
+    handleFailure();
+  });
+  audio.addEventListener('loadedmetadata', () => {
+    const at = pendingSeek;
+    pendingSeek = 0;
+    if (at > 0 && isFinite(audio.duration) && at < audio.duration - 5) {
+      audio.currentTime = at;
+      if (!rec.tries) toast('Seguís desde ' + fmtTime(at));
+    }
+  });
+  audio.addEventListener('playing', () => {
+    clearTimeout(rec.stall);
+    rec.okFrom = audio.currentTime;
+    if ($('#pl-error').classList.contains('info')) playerMsg('');
+  });
+  // Si se queda esperando datos más de 20 segundos, se reconecta.
+  audio.addEventListener('waiting', () => {
+    clearTimeout(rec.stall);
+    rec.stall = setTimeout(() => { if (nowPlaying && !audio.paused && audio.readyState < 3) handleFailure(); }, 20000);
+  });
   audio.addEventListener('play', () => { $('#pl-toggle').innerHTML = ICON.pause; $('#pl-toggle').setAttribute('aria-label', 'Pausar'); refreshEpButtons(); });
   audio.addEventListener('pause', () => { $('#pl-toggle').innerHTML = ICON.play; $('#pl-toggle').setAttribute('aria-label', 'Reproducir'); refreshEpButtons(); savePos(true); });
   audio.addEventListener('timeupdate', () => {
@@ -1240,6 +1305,8 @@
     $('#pl-cur').textContent = fmtTime(c);
     $('#pl-dur').textContent = fmtTime(d);
     if (isFinite(d) && d > 0 && !seeking) $('#pl-seek').value = Math.round(c / d * 1000);
+    if (c > 0 && !audio.seeking) rec.lastGood = c;
+    if (rec.tries && c - rec.okFrom > 30) rec.tries = 0;
     savePos(false);
     if (nowPlaying && isFinite(d) && d > 0 && c / d > 0.8 && !S.listened[nowPlaying.id]) {
       S.listened[nowPlaying.id] = { t: nowPlaying.t, show: nowPlaying.show, at: dayKey() };
@@ -1247,7 +1314,12 @@
       toast('Episodio marcado como escuchado');
     }
   });
-  audio.addEventListener('ended', () => { if (nowPlaying) { try { localStorage.removeItem(posKey(nowPlaying.id)); } catch (e) { console.debug('rlw: posición', e); } } });
+  audio.addEventListener('ended', () => {
+    if (!nowPlaying) return;
+    // Un corte de red a veces llega como "terminó" antes de tiempo: se trata como corte.
+    if (isFinite(audio.duration) && audio.currentTime < audio.duration - 15) { handleFailure(); return; }
+    try { localStorage.removeItem(posKey(nowPlaying.id)); } catch (e) { console.debug('rlw: posición', e); }
+  });
   function savePos(force) {
     if (!nowPlaying) return;
     const now = Date.now();
@@ -1259,7 +1331,7 @@
   const seek = $('#pl-seek');
   seek.addEventListener('input', () => { seeking = true; if (isFinite(audio.duration)) $('#pl-cur').textContent = fmtTime(seek.value / 1000 * audio.duration); });
   seek.addEventListener('change', () => { if (isFinite(audio.duration)) audio.currentTime = seek.value / 1000 * audio.duration; seeking = false; });
-  $('#pl-toggle').addEventListener('click', () => { if (!nowPlaying) return; audio.paused ? audio.play().catch(onPlayError) : audio.pause(); });
+  $('#pl-toggle').addEventListener('click', togglePlay);
   $('#pl-back').addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
   $('#pl-fwd').addEventListener('click', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30); });
   const RATES = [1, 1.25, 1.5, 1.75, 2, 0.8];
@@ -1272,10 +1344,13 @@
   });
   $('#pl-close').addEventListener('click', () => {
     savePos(true);
+    clearRecovery();
+    pendingSeek = 0;
+    nowPlaying = null;
     audio.pause();
     audio.removeAttribute('src');
     audio.load();
-    nowPlaying = null;
+    playerMsg('');
     $('#player').hidden = true;
     setPlayerHeight();
     refreshEpButtons();
@@ -1283,7 +1358,7 @@
   if ('mediaSession' in navigator) {
     const ms = navigator.mediaSession;
     const set = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) { console.debug('rlw: acción ' + a, e); } };
-    set('play', () => audio.play().catch(onPlayError));
+    set('play', () => { if (audio.paused || audio.error) togglePlay(); });
     set('pause', () => audio.pause());
     set('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
     set('seekforward', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30); });
