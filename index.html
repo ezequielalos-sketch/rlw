@@ -132,6 +132,8 @@
     .pool-info{font-size:.82rem;color:var(--faint)}
     .notice{margin:0 0 14px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--gold-soft);border:1px solid color-mix(in srgb, var(--gold) 40%, transparent);font-size:.88rem;line-height:1.45;overflow-wrap:anywhere}
     .notice a{font-weight:700}
+    .notice.install{background:var(--primary-soft);border-color:color-mix(in srgb, var(--primary) 35%, transparent);display:grid;gap:10px}
+    .install-actions{display:flex;flex-wrap:wrap;gap:8px}
     @media (min-width:560px){ .filters-body{grid-template-columns:1fr 1fr} .filters-body .span-2{grid-column:1/-1} }
 
     /* ficha del tema */
@@ -340,6 +342,13 @@
       <!-- HOY -->
       <section class="view" id="view-hoy" aria-labelledby="hoy-h">
         <p class="notice" id="file-notice" hidden>Abriste la app como archivo descargado. Funciona, pero en este modo el navegador puede no guardar tu progreso. Para usarla siempre, abrila desde <a href="https://ezequielalos-sketch.github.io/rlw/">ezequielalos-sketch.github.io/rlw</a> y agregala a la pantalla de inicio.</p>
+        <div class="notice install" id="install-card" hidden>
+          <p><b>Instalá RLW como app.</b> Queda con su ícono en el teléfono, se abre a pantalla completa y las fichas, el plan y tu progreso funcionan sin conexión.</p>
+          <div class="install-actions">
+            <button class="btn btn-primary btn-sm" id="btn-install" type="button">Instalar app</button>
+            <button class="btn btn-ghost btn-sm" id="btn-install-later" type="button">Ahora no</button>
+          </div>
+        </div>
         <div class="view-head">
           <p class="eyebrow" id="today-date">Hoy</p>
           <h1 id="hoy-h" class="sr-only">Tema de hoy</h1>
@@ -452,7 +461,7 @@
             </div>
           </div>
         </div>
-        <p class="foot">Los episodios salen del catálogo público de Apple Podcasts: son episodios gratuitos que se reproducen desde el feed de cada programa. Las lecturas son de Wikipedia en español (licencia CC BY-SA). Programas sugeridos verificados el 23/10/2026.<br>Para usarla como app en el teléfono: abrila en el navegador y elegí “Agregar a la pantalla de inicio”.</p>
+        <p class="foot">Los episodios salen del catálogo público de Apple Podcasts: son episodios gratuitos que se reproducen desde el feed de cada programa. Las lecturas son de Wikipedia en español (licencia CC BY-SA). Programas sugeridos verificados el 23/10/2026.<br>Para usarla como app en el teléfono: abrila en Chrome desde ezequielalos-sketch.github.io/rlw y elegí, en el menú ⋮, “Instalar app” (o “Agregar a la pantalla de inicio”). Instalada, funciona sin conexión salvo los episodios y los resúmenes de Wikipedia.</p>
       </section>
     </main>
   </div>
@@ -1746,6 +1755,33 @@
     else if (S.daily.date !== dayKey()) route();
   });
   window.addEventListener('pagehide', () => { savePos(true); saveNow(); });
+
+  /* ===================== App instalable ===================== */
+
+  // Desde el enlace (https) la app se puede instalar y usar sin conexión; abierta como archivo, no.
+  const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  if ('serviceWorker' in navigator && !IS_FILE) {
+    navigator.serviceWorker.register('sw.js').catch(e => console.debug('rlw: service worker', e));
+  }
+  let installEvt = null;
+  const installSnoozed = () => { try { return +localStorage.getItem('rlw.install.later') > Date.now(); } catch (e) { return false; } };
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    installEvt = e;
+    if (!STANDALONE && !installSnoozed()) $('#install-card').hidden = false;
+  });
+  window.addEventListener('appinstalled', () => { installEvt = null; $('#install-card').hidden = true; toast('RLW quedó instalada'); });
+  $('#btn-install').addEventListener('click', async () => {
+    if (!installEvt) return;
+    installEvt.prompt();
+    try { await installEvt.userChoice; } catch (e) { console.debug('rlw: instalar', e); }
+    installEvt = null;
+    $('#install-card').hidden = true;
+  });
+  $('#btn-install-later').addEventListener('click', () => {
+    $('#install-card').hidden = true;
+    try { localStorage.setItem('rlw.install.later', String(Date.now() + 14 * 864e5)); } catch (e) { console.debug('rlw: instalar', e); }
+  });
 
   /* ===================== Inicio ===================== */
 
