@@ -130,6 +130,8 @@
     .seg input:checked + label{background:var(--surface-2);color:var(--text);box-shadow:var(--shadow-sm)}
     .seg input:focus-visible + label{outline:3px solid color-mix(in srgb, var(--primary) 70%, transparent)}
     .pool-info{font-size:.82rem;color:var(--faint)}
+    .notice{margin:0 0 14px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--gold-soft);border:1px solid color-mix(in srgb, var(--gold) 40%, transparent);font-size:.88rem;line-height:1.45;overflow-wrap:anywhere}
+    .notice a{font-weight:700}
     @media (min-width:560px){ .filters-body{grid-template-columns:1fr 1fr} .filters-body .span-2{grid-column:1/-1} }
 
     /* ficha del tema */
@@ -336,6 +338,7 @@
     <main>
       <!-- HOY -->
       <section class="view" id="view-hoy" aria-labelledby="hoy-h">
+        <p class="notice" id="file-notice" hidden>Abriste la app como archivo descargado. Funciona, pero en este modo el navegador puede no guardar tu progreso. Para usarla siempre, abrila desde <a href="https://ezequielalos-sketch.github.io/rlw/">ezequielalos-sketch.github.io/rlw</a> y agregala a la pantalla de inicio.</p>
         <div class="view-head">
           <p class="eyebrow" id="today-date">Hoy</p>
           <h1 id="hoy-h" class="sr-only">Tema de hoy</h1>
@@ -731,15 +734,37 @@
 
   /* ===================== Red ===================== */
 
+  // Abierta como archivo descargado (file:// o content:// en Android) el navegador suele bloquear fetch hacia
+  // otros sitios. Apple y Wikipedia también responden como script (JSONP), que esos contextos sí dejan cargar.
+  const IS_FILE = !/^https?:$/.test(location.protocol);
+  let fetchBlocked = IS_FILE;
+  function jsonp(url, timeout) {
+    return new Promise((resolve, reject) => {
+      const cb = '__rlw' + Math.random().toString(36).slice(2, 10);
+      const s = document.createElement('script');
+      const done = (err, data) => { clearTimeout(t); delete window[cb]; s.remove(); err ? reject(err) : resolve(data); };
+      const t = setTimeout(() => done(new Error('timeout')), timeout);
+      window[cb] = data => done(null, data);
+      s.onerror = () => done(new Error('jsonp'));
+      s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
+      document.head.appendChild(s);
+    });
+  }
   async function getJSON(url, timeout = 12000) {
+    if (fetchBlocked) return jsonp(url, timeout);
     const ctl = new AbortController();
     const t = setTimeout(() => ctl.abort(), timeout);
-    try {
-      const r = await fetch(url, { signal: ctl.signal });
-      if (r.status === 403 || r.status === 429) { const e = new Error('limit'); e.limit = true; throw e; }
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return await r.json();
+    let r;
+    try { r = await fetch(url, { signal: ctl.signal }); }
+    catch (e) {
+      if (e && e.name === 'AbortError') throw e;
+      console.debug('rlw: fetch bloqueado, uso el respaldo por script', e);
+      fetchBlocked = true;
+      return jsonp(url, timeout);
     } finally { clearTimeout(t); }
+    if (r.status === 403 || r.status === 429) { const e = new Error('limit'); e.limit = true; throw e; }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
   }
 
   const WIKI_API = 'https://es.wikipedia.org/w/api.php';
@@ -1616,6 +1641,7 @@
   $('#f-level').value = S.filters.level;
   $('#pl-toggle').innerHTML = ICON.play;
   $('#pl-rate').textContent = String(S.rate || 1).replace('.', ',') + '×';
+  $('#file-notice').hidden = !IS_FILE;
   applyTheme();
   route();
   setTimeout(pruneCache, 3000);
