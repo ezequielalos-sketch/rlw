@@ -1,0 +1,25 @@
+{
+  "name": "RLW · Aprendizaje aleatorio",
+  "short_name": "RLW",
+  "description": "Un tema nuevo cada día, con episodios de podcast gratuitos, lectura rápida y repaso espaciado.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#01696f",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

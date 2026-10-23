@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="RLW">
+  <meta name="description" content="Un tema nuevo cada día, con episodios de podcast gratuitos sobre ese tema, lectura rápida y repaso espaciado.">
+  <title>RLW</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2301696f'/%3E%3Cpath d='M14 50C14 28 28 16 48 16' stroke='%23f9f8f4' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='48' cy='16' r='6' fill='%23e8af34'/%3E%3C/svg%3E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preconnect" href="https://itunes.apple.com">
+  <link rel="preconnect" href="https://es.wikipedia.org">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=zodiak@400,700&display=swap" rel="stylesheet">
+  <style>
+    /* Ficha de estudio: una columna, la ficha del tema como protagonista, navegación abajo al alcance del pulgar */
+    :root{
+      --bg:#f7f6f2; --surface:#fcfbf8; --surface-2:#ffffff; --offset:#eeebe5; --border:#dcd8cf; --rule:#e4e0d8;
+      --text:#28251d; --muted:#625f58; --faint:#8b877f; --on-primary:#f9f8f4;
+      --primary:#01696f; --primary-hover:#0c4e54; --primary-soft:#dbe9e7; --gold:#c08f00; --gold-soft:#f5ead0;
+      --ok:#2d7a4c; --danger:#a83a3a;
+      --chip-s:36%; --chip-bg:92%; --chip-fg:29%;
+      --heat-0:#ebe8e1;
+      --shadow-sm:0 1px 2px rgba(40,37,29,.05),0 3px 10px rgba(40,37,29,.05);
+      --shadow-md:0 12px 32px rgba(40,37,29,.12);
+      --font-body:'Satoshi',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+      --font-display:'Zodiak',Georgia,'Times New Roman',serif;
+      --radius:18px; --radius-sm:12px;
+      --nav-h:62px;
+      color-scheme:light;
+    }
+    @media (prefers-color-scheme: dark){
+      :root:not([data-theme="light"]){
+        --bg:#171614; --surface:#1e1d1b; --surface-2:#252422; --offset:#2b2926; --border:#3b3936; --rule:#34322f;
+        --text:#dad8d3; --muted:#aaa69f; --faint:#7d7a74; --on-primary:#0f1716;
+        --primary:#5aa7b1; --primary-hover:#79bcc5; --primary-soft:#1f3436; --gold:#e8af34; --gold-soft:#3a3122;
+        --ok:#73c493; --danger:#e58585;
+        --chip-s:24%; --chip-bg:22%; --chip-fg:80%;
+        --heat-0:#2a2825;
+        --shadow-sm:0 1px 2px rgba(0,0,0,.3),0 3px 10px rgba(0,0,0,.2);
+        --shadow-md:0 12px 32px rgba(0,0,0,.45);
+        color-scheme:dark;
+      }
+    }
+    :root[data-theme="dark"]{
+      --bg:#171614; --surface:#1e1d1b; --surface-2:#252422; --offset:#2b2926; --border:#3b3936; --rule:#34322f;
+      --text:#dad8d3; --muted:#aaa69f; --faint:#7d7a74; --on-primary:#0f1716;
+      --primary:#5aa7b1; --primary-hover:#79bcc5; --primary-soft:#1f3436; --gold:#e8af34; --gold-soft:#3a3122;
+      --ok:#73c493; --danger:#e58585;
+      --chip-s:24%; --chip-bg:22%; --chip-fg:80%;
+      --heat-0:#2a2825;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.3),0 3px 10px rgba(0,0,0,.2);
+      --shadow-md:0 12px 32px rgba(0,0,0,.45);
+      color-scheme:dark;
+    }
+
+    *,*::before,*::after{box-sizing:border-box}
+    *{margin:0;padding:0}
+    html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    body{min-height:100dvh;font-family:var(--font-body);font-size:16px;line-height:1.55;color:var(--text);background:var(--bg);
+      padding-bottom:calc(var(--nav-h) + var(--player-h, 0px) + env(safe-area-inset-bottom, 0px) + 28px)}
+    img{display:block;max-width:100%;height:auto}
+    button,select,input,textarea{font:inherit;color:inherit}
+    button{cursor:pointer;background:none;border:none}
+    a{color:var(--primary)}
+    :focus-visible{outline:3px solid color-mix(in srgb, var(--primary) 70%, transparent);outline-offset:2px;border-radius:6px}
+    [hidden]{display:none!important}
+    h1,h2,h3{text-wrap:balance}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+    .app{max-width:680px;margin:0 auto;padding-top:calc(env(safe-area-inset-top, 0px) + 12px);
+      padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+
+    /* barra superior */
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 14px}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:inherit}
+    .logo{width:38px;height:38px;color:var(--primary);flex:none}
+    .brand b{font-family:var(--font-display);font-size:1.35rem;line-height:1;letter-spacing:.01em}
+    .brand small{display:block;font-size:.78rem;color:var(--muted);line-height:1.2}
+    .top-right{display:flex;align-items:center;gap:8px}
+    .pill{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;background:var(--surface);border:1px solid var(--border);font-size:.85rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text);text-decoration:none}
+    .pill .flame{color:var(--gold)}
+    .icon-btn{display:inline-grid;place-items:center;min-width:44px;min-height:44px;border-radius:999px;color:var(--text)}
+    .theme-btn{border:1px solid var(--border);background:var(--surface)}
+    .icon-btn svg{width:20px;height:20px}
+
+    /* encabezados de vista */
+    .view-head{display:grid;gap:6px;margin:6px 0 18px}
+    .eyebrow{font-size:.74rem;text-transform:uppercase;letter-spacing:.13em;font-weight:700;color:var(--primary)}
+    .view-head h1{font-family:var(--font-display);font-size:clamp(1.9rem,1.5rem + 2vw,2.5rem);line-height:1.05}
+    .lead{color:var(--muted);max-width:60ch}
+    .h2{font-family:var(--font-display);font-size:1.35rem;margin:28px 0 12px}
+    .h3{font-family:var(--font-display);font-size:1.15rem;margin-bottom:12px}
+
+    /* botones */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 16px;border-radius:999px;border:1px solid var(--border);background:var(--surface-2);font-weight:600;font-size:.95rem;line-height:1.2;text-align:center;text-decoration:none;color:var(--text);transition:background .15s,border-color .15s,transform .1s}
+    .btn:hover{border-color:color-mix(in srgb, var(--primary) 40%, var(--border))}
+    .btn:active{transform:scale(.98)}
+    .btn-primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+    .btn-primary:hover{background:var(--primary-hover);border-color:var(--primary-hover)}
+    .btn-ghost{background:transparent}
+    .btn-sm{min-height:38px;padding:6px 12px;font-size:.88rem}
+    .btn svg{width:18px;height:18px;flex:none}
+    .btn[disabled]{opacity:.55;cursor:default}
+    .link-btn{color:var(--primary);font-weight:600;text-decoration:underline;text-underline-offset:3px;min-height:44px;padding:0 4px}
+
+    /* generador */
+    .gen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+    .gen .btn{flex-direction:column;gap:2px;min-height:58px;padding:8px 6px;border-radius:var(--radius-sm)}
+    .gen .btn small{font-weight:500;font-size:.72rem;opacity:.8}
+    .filters{border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-sm);margin-bottom:16px}
+    .filters summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:8px 14px;cursor:pointer;font-size:.9rem;color:var(--muted)}
+    .filters summary::-webkit-details-marker{display:none}
+    .filters summary b{color:var(--text);font-weight:600}
+    .filters summary .chev{transition:transform .2s;flex:none}
+    .filters[open] summary .chev{transform:rotate(180deg)}
+    .filters-body{display:grid;gap:12px;padding:4px 14px 14px}
+    .field{display:grid;gap:6px;min-width:0}
+    .field > label,.field > legend,.label{font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;color:var(--muted)}
+    select,input[type="date"]{width:100%;min-height:46px;padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-2)}
+    fieldset{border:none;min-width:0}
+    .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:var(--radius-sm);background:var(--offset)}
+    .seg input{position:absolute;opacity:0;pointer-events:none}
+    .seg label{display:grid;place-items:center;min-height:40px;border-radius:9px;font-weight:600;font-size:.92rem;cursor:pointer;color:var(--muted);font-variant-numeric:tabular-nums}
+    .seg input:checked + label{background:var(--surface-2);color:var(--text);box-shadow:var(--shadow-sm)}
+    .seg input:focus-visible + label{outline:3px solid color-mix(in srgb, var(--primary) 70%, transparent)}
+    .pool-info{font-size:.82rem;color:var(--faint)}
+    @media (min-width:560px){ .filters-body{grid-template-columns:1fr 1fr} .filters-body .span-2{grid-column:1/-1} }
+
+    /* ficha del tema */
+    .ficha{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px 18px 18px;display:grid;gap:18px}
+    .ficha-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;font-size:.8rem;color:var(--muted)}
+    .ficha-no{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--faint);letter-spacing:.06em}
+    .chip{display:inline-flex;align-items:center;min-height:26px;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:700;
+      background:hsl(var(--h,180) var(--chip-s) var(--chip-bg));color:hsl(var(--h,180) 45% var(--chip-fg))}
+    .chip-wiki{--h:40}
+    .rareza{display:inline-flex;align-items:center;gap:5px}
+    .rareza .dots{color:var(--gold);letter-spacing:1px;font-size:.7rem}
+    .ficha-src{font-weight:600;color:var(--primary)}
+    .ficha-title{font-family:var(--font-display);font-size:clamp(1.75rem,1.4rem + 2vw,2.35rem);line-height:1.08;outline:none}
+    .ficha-img{width:100%;max-height:260px;object-fit:cover;border-radius:var(--radius-sm);background:var(--offset)}
+    .ficha-intro{font-size:1.08rem;line-height:1.6}
+    .done-badge{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:var(--ok)}
+    .block{display:grid;gap:10px;padding-top:16px;border-top:1px solid var(--rule)}
+    .questions{display:grid;gap:8px;padding-left:1.4rem}
+    .questions li::marker{font-family:var(--font-display);color:var(--primary);font-weight:700}
+    .tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{font-size:.8rem;padding:4px 10px;border-radius:999px;background:var(--offset);color:var(--muted)}
+    .hint{font-size:.85rem;color:var(--muted)}
+    .subhead{font-size:.8rem;font-weight:700;color:var(--muted);margin-top:4px}
+
+    /* línea de tiempo de la sesión */
+    .timeline{display:flex;height:12px;border-radius:999px;overflow:hidden;gap:2px;background:var(--offset)}
+    .timeline span{display:block;height:100%}
+    .steps{list-style:none;display:grid;gap:6px}
+    .steps li{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:baseline;font-size:.92rem}
+    .steps .sw{width:10px;height:10px;border-radius:3px;align-self:center}
+    .steps .min{font-variant-numeric:tabular-nums;font-weight:700;min-width:3.2ch}
+    .steps .what{color:var(--muted)}
+    .steps .what b{color:var(--text);font-weight:600}
+    .seg-listen{background:var(--primary)} .seg-read{background:color-mix(in srgb, var(--primary) 55%, var(--gold))}
+    .seg-think{background:var(--gold)} .seg-write{background:color-mix(in srgb, var(--gold) 45%, var(--faint))}
+
+    /* lectura */
+    .extract{font-size:.97rem;line-height:1.6;color:var(--text)}
+    .extract.loading,.episodes-msg{color:var(--faint);font-size:.9rem}
+    .linkrow{display:flex;flex-wrap:wrap;gap:8px}
+    .linkrow a{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface-2);font-size:.86rem;font-weight:600;text-decoration:none;color:var(--text)}
+    .linkrow a:hover{border-color:var(--primary)}
+    .linkrow a svg{width:14px;height:14px;color:var(--faint)}
+
+    /* episodios */
+    .eps{list-style:none;display:grid;gap:8px}
+    .ep{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border)}
+    .ep.playing{border-color:var(--primary);background:color-mix(in srgb, var(--primary) 7%, var(--surface-2))}
+    .ep-play{position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;background:var(--offset);display:grid;place-items:center;flex:none}
+    .ep-play img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .ep-play .ic{position:relative;display:grid;place-items:center;width:30px;height:30px;border-radius:999px;background:color-mix(in srgb, var(--surface-2) 88%, transparent);color:var(--primary);box-shadow:var(--shadow-sm)}
+    .ep-play .ic svg{width:14px;height:14px}
+    .ep-body{min-width:0}
+    .ep-title{font-weight:600;font-size:.93rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+    .ep-meta{font-size:.78rem;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+    .ep-meta .ok{color:var(--ok);font-weight:700}
+    .ep-meta .en{color:var(--gold);font-weight:700}
+    .ep-link{display:grid;place-items:center;width:40px;height:40px;border-radius:999px;color:var(--faint)}
+    .ep-link:hover{color:var(--primary);background:var(--offset)}
+    .ep-link svg{width:16px;height:16px}
+    .skel{height:66px;border-radius:var(--radius-sm);background:linear-gradient(90deg,var(--offset),var(--surface-2),var(--offset));background-size:200% 100%;animation:shimmer 1.3s infinite linear}
+    @keyframes shimmer{to{background-position:-200% 0}}
+    .shows{list-style:none;display:grid;gap:6px}
+    .shows a{display:flex;justify-content:space-between;gap:10px;align-items:center;min-height:44px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--offset);text-decoration:none;color:var(--text);font-size:.9rem}
+    .shows a span{color:var(--muted);font-size:.8rem;text-align:right}
+
+    /* nota tipo ficha rayada */
+    .note{width:100%;min-height:calc(1.65em * 4 + 20px);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);resize:vertical;line-height:1.65em;
+      background-color:var(--surface-2);background-image:repeating-linear-gradient(to bottom, transparent 0, transparent calc(1.65em - 1px), var(--rule) calc(1.65em - 1px), var(--rule) 1.65em);
+      background-position:0 9px;background-attachment:local}
+    .note-hint{color:var(--danger)}
+    .ficha-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:16px;border-top:1px solid var(--rule)}
+    .ficha-actions .btn-primary{grid-column:1/-1}
+
+    /* tarjetas genéricas */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm)}
+    .stack{display:grid;gap:12px}
+    .empty{padding:22px 16px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:var(--radius)}
+    .empty b{display:block;color:var(--text);font-family:var(--font-display);font-size:1.1rem;margin-bottom:4px}
+
+    /* repaso */
+    .flash{display:grid;gap:14px}
+    .flash-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.8rem;color:var(--muted)}
+    .flash-top .count{margin-left:auto;font-variant-numeric:tabular-nums}
+    .boxes{display:inline-flex;gap:3px;align-items:center}
+    .boxes i{width:14px;height:8px;border-radius:2px;background:var(--offset);border:1px solid var(--border)}
+    .boxes i.on{background:var(--primary);border-color:var(--primary)}
+    .flash h3{font-family:var(--font-display);font-size:1.6rem;line-height:1.1}
+    .prompt{font-size:1.05rem}
+    .reveal{display:grid;gap:8px;padding:12px;border-radius:var(--radius-sm);background:var(--offset)}
+    .reveal .mine{font-family:var(--font-display);font-size:1.05rem}
+    .reveal .ctx{font-size:.88rem;color:var(--muted)}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .row-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--rule)}
+    .row-item:first-child{border-top:none;padding-top:0}
+    .row-item:last-child{padding-bottom:0}
+    .row-item .t{font-weight:600;line-height:1.3}
+    .row-item .m{font-size:.8rem;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+    .row-item .n{font-size:.88rem;color:var(--muted);margin-top:4px;font-style:italic;overflow-wrap:anywhere}
+    .row-actions{display:flex;gap:6px}
+
+    /* plan */
+    .plan-start{display:grid;gap:10px;margin-bottom:14px}
+    .meter{height:8px;border-radius:999px;background:var(--offset);overflow:hidden}
+    .meter span{display:block;height:100%;background:var(--primary);border-radius:999px;transition:width .3s}
+    .weeks{display:grid;gap:8px}
+    .week{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm)}
+    .week.now{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+    .week summary{list-style:none;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;min-height:58px;padding:10px 14px;cursor:pointer}
+    .week summary::-webkit-details-marker{display:none}
+    .wk-n{display:grid;place-items:center;width:34px;height:34px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-weight:700;font-variant-numeric:tabular-nums}
+    .week.done .wk-n{background:var(--primary);color:var(--on-primary)}
+    .wk-t{font-family:var(--font-display);font-size:1.08rem;line-height:1.2}
+    .wk-s{font-size:.75rem;font-weight:700;color:var(--muted);text-align:right}
+    .week.now .wk-s{color:var(--primary)}
+    .week.done .wk-s{color:var(--ok)}
+    .wk-body{display:grid;gap:10px;padding:0 14px 14px 60px}
+    .wk-body p{font-size:.93rem}
+    .wk-body .q{font-weight:600}
+
+    /* progreso */
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+    .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
+    .stat b{display:block;font-family:var(--font-display);font-size:1.9rem;line-height:1.1;font-variant-numeric:tabular-nums}
+    .stat span{font-size:.8rem;color:var(--muted)}
+    .heat-wrap{overflow-x:auto}
+    .heat{display:grid;grid-template-rows:repeat(7,14px);grid-auto-flow:column;grid-auto-columns:14px;gap:4px;width:max-content}
+    .heat i{border-radius:3px;background:var(--heat-0)}
+    .heat i.l1{background:color-mix(in srgb, var(--primary) 35%, var(--heat-0))}
+    .heat i.l2{background:color-mix(in srgb, var(--primary) 65%, var(--heat-0))}
+    .heat i.l3{background:var(--primary)}
+    .heat i.today{outline:2px solid var(--gold);outline-offset:1px}
+    .heat-legend{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--faint);margin-top:8px}
+    .heat-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+    .bars{display:grid;gap:9px}
+    .bar{display:grid;grid-template-columns:minmax(0,9.5rem) 1fr auto;gap:10px;align-items:center;font-size:.85rem}
+    .bar .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .bar .tr{height:10px;border-radius:999px;background:var(--offset);overflow:hidden}
+    .bar .tr span{display:block;height:100%;border-radius:999px;background:hsl(var(--h) 45% 45%)}
+    .bar .ct{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.8rem;min-width:3.5ch;text-align:right}
+    .opts{display:grid;gap:14px}
+    .data-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .foot{font-size:.8rem;color:var(--faint);margin:26px 0 8px;line-height:1.5}
+    .foot a{color:inherit}
+
+    /* reproductor */
+    .player{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));z-index:30;
+      padding:10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+      background:color-mix(in srgb, var(--surface) 94%, transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(0,0,0,.08)}
+    .player-in{max-width:680px;margin:0 auto;display:grid;gap:6px}
+    .player-top{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    .pl-info{min-width:0}
+    .pl-title{font-weight:700;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pl-show{font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pl-ctrls{display:grid;grid-template-columns:auto 1fr auto auto auto 1fr auto;align-items:center;gap:4px}
+    .pl-time{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:4.4ch}
+    .pl-time.r{text-align:right}
+    .pl-ctrls .icon-btn{font-weight:700;font-size:.8rem;font-variant-numeric:tabular-nums}
+    .pl-main{width:48px;height:48px;background:var(--primary)!important;color:var(--on-primary)!important}
+    .pl-main svg{width:20px;height:20px}
+    input[type="range"]{width:100%;accent-color:var(--primary);height:22px}
+    .pl-error{font-size:.82rem;color:var(--danger)}
+
+    /* navegación inferior */
+    .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--surface);border-top:1px solid var(--border);
+      padding:0 max(8px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(8px, env(safe-area-inset-left, 0px))}
+    .tabbar-in{max-width:680px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--nav-h)}
+    .tabbar a{position:relative;display:grid;place-items:center;align-content:center;gap:2px;text-decoration:none;color:var(--faint);font-size:.72rem;font-weight:700;letter-spacing:.02em}
+    .tabbar a svg{width:22px;height:22px}
+    .tabbar a[aria-current="page"]{color:var(--primary)}
+    .tabbar a[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--primary)}
+    .badge{position:absolute;top:7px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--gold);color:#1d1a12;font-size:.68rem;font-weight:800;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+
+    .toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + var(--player-h, 0px) + env(safe-area-inset-bottom, 0px) + 14px);transform:translateX(-50%);z-index:40;
+      max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;background:var(--text);color:var(--bg);font-size:.88rem;font-weight:600;box-shadow:var(--shadow-md);text-align:center}
+
+    @media (min-width:760px){
+      .stats{grid-template-columns:repeat(4,1fr)}
+      .ficha{padding:26px 26px 22px}
+    }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="#hoy" aria-label="RLW, ir a Hoy">
+        <svg class="logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <path d="M10 48C10 24 26 12 48 12" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+          <path d="M18 52C18 34 30 24 46 24" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity=".6"/>
+          <circle cx="48" cy="12" r="6" fill="var(--gold)"/>
+          <circle cx="46" cy="24" r="4" fill="currentColor" opacity=".7"/>
+        </svg>
+        <span><b>RLW</b><small>Aprendizaje aleatorio</small></span>
+      </a>
+      <div class="top-right">
+        <a class="pill" href="#progreso" id="streak-pill" title="Días seguidos con actividad"><span class="flame" aria-hidden="true">●</span><span id="streak-n">0</span>&nbsp;días</a>
+        <button class="icon-btn theme-btn" id="theme-btn" type="button" aria-label="Tema: según el sistema"></button>
+      </div>
+    </header>
+
+    <main>
+      <!-- HOY -->
+      <section class="view" id="view-hoy" aria-labelledby="hoy-h">
+        <div class="view-head">
+          <p class="eyebrow" id="today-date">Hoy</p>
+          <h1 id="hoy-h" class="sr-only">Tema de hoy</h1>
+        </div>
+        <div class="gen" role="group" aria-label="Elegir otro tema">
+          <button class="btn" id="btn-next" type="button">Otro tema<small>según filtros</small></button>
+          <button class="btn" id="btn-wild" type="button">Modo insolente<small>cualquier área</small></button>
+          <button class="btn" id="btn-wiki" type="button">Tema infinito<small>Wikipedia</small></button>
+        </div>
+        <details class="filters" id="filters">
+          <summary><span>Filtros: <b id="filters-sum">todas las áreas · cualquier rareza · 45 min</b></span>
+            <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="filters-body">
+            <div class="field"><label for="f-area">Área</label><select id="f-area"></select></div>
+            <div class="field"><label for="f-level">Rareza</label>
+              <select id="f-level">
+                <option value="0">Cualquiera</option>
+                <option value="1">Suave</option>
+                <option value="2">Media</option>
+                <option value="3">Alta</option>
+              </select></div>
+            <fieldset class="field span-2"><legend>Tiempo disponible</legend>
+              <div class="seg">
+                <input type="radio" name="f-time" id="t20" value="20"><label for="t20">20 min</label>
+                <input type="radio" name="f-time" id="t45" value="45"><label for="t45">45 min</label>
+                <input type="radio" name="f-time" id="t90" value="90"><label for="t90">90 min</label>
+              </div></fieldset>
+            <p class="pool-info span-2" id="pool-info"></p>
+          </div>
+        </details>
+        <div id="topic"></div>
+        <p style="text-align:center;margin-top:10px"><button class="link-btn" id="btn-daily" type="button" hidden>Volver al tema de hoy</button></p>
+      </section>
+
+      <!-- REPASO -->
+      <section class="view" id="view-repaso" aria-labelledby="repaso-h" hidden>
+        <div class="view-head">
+          <p class="eyebrow">Repaso espaciado</p>
+          <h1 id="repaso-h" tabindex="-1">Repaso</h1>
+          <p class="lead">Cada tema que marcás como aprendido vuelve a los 1, 3, 7, 16, 35 y 90 días. Si te acordás, pasa a la caja siguiente; si no, vuelve a la primera.</p>
+        </div>
+        <div id="review-area"></div>
+        <h2 class="h2">Guardados para después</h2>
+        <div id="saved-list"></div>
+        <h2 class="h2">Próximos repasos</h2>
+        <div id="upcoming-list"></div>
+      </section>
+
+      <!-- PLAN -->
+      <section class="view" id="view-plan" aria-labelledby="plan-h" hidden>
+        <div class="view-head">
+          <p class="eyebrow">Plan base</p>
+          <h1 id="plan-h" tabindex="-1">12 semanas</h1>
+          <p class="lead">Un tema por semana con una pregunta central. Elegí cuándo empieza y la app marca la semana en curso.</p>
+        </div>
+        <div class="card plan-start">
+          <div class="field"><label for="plan-start">Empieza el</label><input type="date" id="plan-start"></div>
+          <p id="plan-status" class="hint"></p>
+          <div class="meter" aria-hidden="true"><span id="plan-meter" style="width:0"></span></div>
+        </div>
+        <div class="weeks" id="weeks"></div>
+      </section>
+
+      <!-- PROGRESO -->
+      <section class="view" id="view-progreso" aria-labelledby="prog-h" hidden>
+        <div class="view-head">
+          <p class="eyebrow">Tu registro</p>
+          <h1 id="prog-h" tabindex="-1">Progreso</h1>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="stack">
+          <div class="card">
+            <h2 class="h3">Últimas 12 semanas</h2>
+            <div class="heat-wrap"><div class="heat" id="heat" role="img"></div></div>
+            <div class="heat-legend" aria-hidden="true">menos <i style="background:var(--heat-0)"></i><i style="background:color-mix(in srgb, var(--primary) 35%, var(--heat-0))"></i><i style="background:color-mix(in srgb, var(--primary) 65%, var(--heat-0))"></i><i style="background:var(--primary)"></i> más</div>
+          </div>
+          <div class="card">
+            <h2 class="h3">Por área</h2>
+            <p class="hint" id="areas-hint" style="margin-bottom:12px"></p>
+            <div class="bars" id="areas"></div>
+          </div>
+          <div class="card">
+            <h2 class="h3">Lo que aprendiste</h2>
+            <div id="history"></div>
+          </div>
+          <div class="card">
+            <h2 class="h3">Ajustes</h2>
+            <div class="opts">
+              <fieldset class="field"><legend>Idioma de los episodios</legend>
+                <div class="seg" style="grid-template-columns:1fr 1fr">
+                  <input type="radio" name="o-lang" id="lang-es" value="es"><label for="lang-es">Solo español</label>
+                  <input type="radio" name="o-lang" id="lang-en" value="es+en"><label for="lang-en">Español + inglés</label>
+                </div></fieldset>
+              <fieldset class="field"><legend>Tema visual</legend>
+                <div class="seg">
+                  <input type="radio" name="o-theme" id="th-system" value="system"><label for="th-system">Sistema</label>
+                  <input type="radio" name="o-theme" id="th-light" value="light"><label for="th-light">Claro</label>
+                  <input type="radio" name="o-theme" id="th-dark" value="dark"><label for="th-dark">Oscuro</label>
+                </div></fieldset>
+            </div>
+          </div>
+          <div class="card">
+            <h2 class="h3">Tus datos</h2>
+            <p class="hint">Tu progreso se guarda solo en este navegador. Exportalo para tener una copia o pasarlo a otro dispositivo; al importar se suma a lo que ya tenés.</p>
+            <div class="data-actions">
+              <button class="btn btn-sm" id="btn-export" type="button">Exportar copia</button>
+              <button class="btn btn-sm" id="btn-import" type="button">Importar copia</button>
+              <input type="file" id="import-file" accept="application/json,.json" hidden>
+              <button class="btn btn-sm btn-ghost" id="btn-reset" type="button">Borrar todo</button>
+            </div>
+          </div>
+        </div>
+        <p class="foot">Los episodios salen del catálogo público de Apple Podcasts: son episodios gratuitos que se reproducen desde el feed de cada programa. Las lecturas son de Wikipedia en español (licencia CC BY-SA). Programas sugeridos verificados el 23/10/2026.<br>Para usarla como app en el teléfono: abrila en el navegador y elegí “Agregar a la pantalla de inicio”.</p>
+      </section>
+    </main>
+  </div>
+
+  <div class="player" id="player" hidden>
+    <div class="player-in">
+      <div class="player-top">
+        <div class="pl-info"><p class="pl-title" id="pl-title"></p><p class="pl-show" id="pl-show"></p></div>
+        <button class="icon-btn" id="pl-close" type="button" aria-label="Cerrar reproductor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <input type="range" id="pl-seek" min="0" max="1000" value="0" step="1" aria-label="Posición del episodio">
+      <div class="pl-ctrls">
+        <span class="pl-time" id="pl-cur">0:00</span><span></span>
+        <button class="icon-btn" id="pl-back" type="button" aria-label="Retroceder 15 segundos">−15</button>
+        <button class="icon-btn pl-main" id="pl-toggle" type="button" aria-label="Reproducir"></button>
+        <button class="icon-btn" id="pl-fwd" type="button" aria-label="Adelantar 30 segundos">+30</button>
+        <button class="icon-btn" id="pl-rate" type="button" aria-label="Velocidad de reproducción">1×</button>
+        <span class="pl-time r" id="pl-dur">0:00</span>
+      </div>
+      <p class="pl-error" id="pl-error" hidden></p>
+    </div>
+  </div>
+
+  <nav class="tabbar" aria-label="Secciones">
+    <div class="tabbar-in">
+      <a href="#hoy" data-view="hoy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Hoy</a>
+      <a href="#repaso" data-view="repaso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg>Repaso<b class="badge" id="due-badge" hidden>0</b></a>
+      <a href="#plan" data-view="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</a>
+      <a href="#progreso" data-view="progreso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Progreso</a>
+    </div>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <noscript><p style="padding:16px">RLW necesita JavaScript activado para funcionar.</p></noscript>
+
+  <script>
+  'use strict';
+
+  /* ===================== Datos ===================== */
+
+  // Programas gratuitos verificados en el catálogo de Apple Podcasts el 23/10/2026 (con episodios recientes).
+  const SHOWS = {
+    hablando:   { n:'Hablando con Científicos', by:'Cienciaes.com', id:304214854 },
+    cata:       { n:'Catástrofe Ultravioleta', by:'elDiario.es', id:842825466 },
+    coffee:     { n:'Coffee Break: Señal y Ruido', by:'Astrofísica y física', id:1028912310 },
+    laika:      { n:'El sueño de Laika', by:'Astronomía', id:1486099235 },
+    acontece:   { n:'Acontece que no es poco', by:'Nieves Concostrina · SER', id:1558594775 },
+    serhistoria:{ n:'SER Historia', by:'Cadena SER', id:356329864 },
+    mente:      { n:'Entiende Tu Mente', by:'Psicología', id:1229124446 },
+    hombros:    { n:'A hombros de gigantes', by:'Radio 5 · RNE', id:297965137 },
+    brujula:    { n:'La Brújula de la Ciencia', by:'Alberto Aparici · Onda Cero', id:1025914564 },
+    mindfacts:  { n:'Mindfacts', by:'Historia de la ciencia y la técnica', id:1489462965 },
+    natgeo:     { n:'Despierta tu curiosidad', by:'National Geographic España', id:1693657645 },
+    ambulante:  { n:'Radio Ambulante', by:'Historias de América Latina', id:527614348 },
+    raiz5:      { n:'Raíz de 5', by:'Matemáticas con humor', id:1219201779 },
+    quilo:      { n:'Quilo de Ciencia', by:'Jorge Laborda · Cienciaes', id:378116361 },
+    zoo:        { n:'Zoo de fósiles', by:'Cienciaes.com', id:318550108 },
+    eco3:       { n:'La economía en 3 minutos', by:'Andrés Borenstein', id:1514997787 },
+    orden:      { n:'El Orden Mundial', by:'Onda Cero', id:1462879154 },
+    musica:     { n:'Música y significado', by:'Radio Clásica', id:1849696403 },
+    fallo:      { n:'Fallo de sistema', by:'Radio 3', id:464415550 },
+  };
+
+  const AREAS = {
+    naturaleza: { n:'Naturaleza extraña',   h:150, shows:['hablando','cata'] },
+    espacio:    { n:'Espacio y física',     h:222, shows:['coffee','laika'] },
+    historia:   { n:'Historia improbable',  h:28,  shows:['acontece','serhistoria'] },
+    mente:      { n:'Mente y percepción',   h:280, shows:['mente','hombros'] },
+    materiales: { n:'Objetos y materiales', h:190, shows:['brujula','mindfacts'] },
+    lenguaje:   { n:'Lenguas y palabras',   h:335, shows:['natgeo','ambulante'] },
+    numeros:    { n:'Números y patrones',   h:255, shows:['raiz5','cata'] },
+    cuerpo:     { n:'Cuerpo y medicina',    h:5,   shows:['quilo','hombros'] },
+    tierra:     { n:'Tierra y clima',       h:95,  shows:['zoo','cata'] },
+    sociedad:   { n:'Economía y sociedad',  h:45,  shows:['eco3','orden'] },
+    arte:       { n:'Arte y sonido',        h:305, shows:['musica','fallo'] },
+    tecnica:    { n:'Técnica e inventos',   h:205, shows:['mindfacts','fallo'] },
+  };
+
+  // a: área · l: rareza (1 suave, 2 media, 3 alta) · t: título · i: introducción · q: preguntas · k: claves
+  // w: artículo de Wikipedia · s: búsqueda de episodios · c: conexión (temas del plan)
+  const TOPICS = [
+    // Naturaleza extraña
+    { id:'bioluminiscencia', a:'naturaleza', l:1, t:'Bioluminiscencia', i:'Luciérnagas, hongos, medusas y bacterias producen luz con una reacción química: una enzima, la luciferasa, oxida una molécula llamada luciferina. Casi toda la energía sale como luz y muy poca como calor.', q:['¿Cómo emiten luz algunos seres vivos con una eficiencia que la tecnología todavía envidia?','¿Para qué la usan: atraer pareja, cazar, defenderse o comunicarse?'], k:['luciferina y luciferasa','señal, defensa y caza','luz casi sin calor'], c:'Una misma señal visible puede cumplir funciones muy distintas con un costo mínimo.', w:'Bioluminiscencia', s:'bioluminiscencia' },
+    { id:'criptobiosis', a:'naturaleza', l:2, t:'Criptobiosis', i:'Algunos organismos, como los tardígrados, pierden casi toda el agua de su cuerpo y detienen su metabolismo de forma reversible. Pueden pasar años así y volver a la actividad cuando se rehidratan.', q:['¿Qué implica que un organismo suspenda casi toda actividad y luego vuelva?','¿Está vivo un organismo con el metabolismo detenido?'], k:['tardígrados','anhidrobiosis','límites de la vida'], c:'Cuestiona categorías rígidas como vivo o muerto, activo o inactivo.', w:'Criptobiosis', s:'tardígrados' },
+    { id:'micelio', a:'naturaleza', l:2, t:'Micelio y bosques', i:'Las micorrizas unen hongos y raíces e intercambian nutrientes. La idea de un “internet del bosque” en el que los árboles se ayudan a través de los hongos se volvió muy popular, pero una revisión de 2023 señaló que la evidencia de campo es bastante más débil de lo que se suele contar.', q:['¿Qué parte de la idea de bosques conectados por hongos está bien apoyada y cuál está exagerada?','¿Qué habría que medir para probar que un árbol “ayuda” a otro?'], k:['micorrizas','nutrientes y señales','metáforas de red'], c:'Permite separar el dato, la metáfora seductora y la inferencia excesiva.', w:'Micorriza', s:'micorrizas' },
+    { id:'bandadas', a:'naturaleza', l:2, t:'Bandadas y emergencia', i:'Los estorninos forman nubes de miles de aves que giran al unísono. Los estudios muestran que cada ave sigue a unas seis o siete vecinas, sin importar la distancia, y que con esas reglas locales alcanza para producir el patrón global.', q:['¿Cómo se coordinan miles de aves sin un líder visible?','¿Qué otros sistemas funcionan con reglas locales y efectos globales?'], k:['autoorganización','reglas locales','patrones globales'], c:'Sirve para pensar cómo surgen formas complejas desde reglas mínimas.', w:'Bandada', s:'estorninos' },
+    { id:'fermentacion', a:'naturaleza', l:1, t:'Fermentación', i:'Levaduras y bacterias transforman azúcares en ácidos, gas o alcohol. Así existen el pan, el yogur, el queso, el chucrut, el vino y la cerveza, mucho antes de que alguien supiera que los microbios existían.', q:['¿Cómo transforman los microorganismos los alimentos, sus sabores y su conservación?','¿Qué diferencia una fermentación de una podredumbre?'], k:['microbios','ambiente y control','cultura material'], c:'Une química, domesticación y tradición cultural en un mismo proceso.', w:'Fermentación', s:'fermentación' },
+    { id:'liquenes', a:'naturaleza', l:1, t:'Líquenes: una alianza incómoda', i:'Parecen una sola planta, pero son la asociación estable entre un hongo y un alga o una cianobacteria. En algunos se encontró además una levadura que funciona como tercer socio.', q:['¿Qué gana cada socio?','¿Qué rompe esta alianza en la idea clásica de individuo?'], k:['simbiosis','hongo y alga','indicadores de aire limpio'], w:'Liquen', s:'líquenes hongos' },
+    { id:'mimetismo', a:'naturaleza', l:2, t:'Mimetismo batesiano', i:'Una especie inofensiva imita las señales de advertencia de otra peligrosa, como las moscas que parecen avispas. El engaño funciona mientras los imitadores sean menos que los modelos.', q:['¿Cuándo deja de funcionar el engaño?','¿Qué evidencia muestra que un depredador aprende esa señal?'], k:['señales de advertencia','modelo e imitador','frecuencia'], w:'Mimetismo batesiano', s:'mimetismo' },
+    { id:'ophiocordyceps', a:'naturaleza', l:3, t:'El hongo que maneja hormigas', i:'Ophiocordyceps infecta hormigas carpinteras y las lleva a trepar y morder la nervadura de una hoja, a una altura precisa, antes de morir. Desde ahí el hongo crece y dispersa sus esporas sobre otras hormigas.', q:['¿Se puede hablar de control de la conducta sin antropomorfizar?','¿Cómo se demuestra el mecanismo?'], k:['parasitismo','fenotipo extendido','esporas'], w:'Ophiocordyceps unilateralis', s:'hongo zombi' },
+    { id:'pulpos', a:'naturaleza', l:2, t:'Pulpos: inteligencia repartida', i:'Un pulpo tiene unos 500 millones de neuronas y cerca de dos tercios están en los brazos, que pueden reaccionar con bastante autonomía. Es una inteligencia que evolucionó por un camino completamente separado del nuestro.', q:['¿Qué significa pensar con el cuerpo?','¿Cómo se compara una inteligencia que evolucionó lejos de los vertebrados?'], k:['cefalópodos','sistema nervioso distribuido','camuflaje'], w:'Octopoda', s:'pulpos inteligencia' },
+    { id:'anguilas', a:'naturaleza', l:3, t:'El misterio de las anguilas', i:'Las anguilas europeas viven en ríos y lagos pero viajan miles de kilómetros para reproducirse en el mar de los Sargazos. Nadie observó todavía su reproducción en libertad.', q:['¿Cómo se estudia algo que nunca se vio?','¿Por qué un animal haría un viaje tan largo para reproducirse?'], k:['mar de los Sargazos','larvas leptocéfalas','especie en peligro'], w:'Anguilla anguilla', s:'anguila europea' },
+
+    // Espacio y física
+    { id:'lagrange', a:'espacio', l:2, t:'Puntos de Lagrange', i:'Son cinco posiciones alrededor de dos cuerpos en órbita, como el Sol y la Tierra, donde un tercer objeto chico puede mantenerse quieto respecto de ellos. El telescopio James Webb trabaja cerca del punto L2.', q:['¿Cómo puede haber posiciones útiles en el espacio definidas por un equilibrio dinámico?','¿Por qué L4 y L5 son estables y L1, L2 y L3 no?'], k:['L1 a L5','mecánica orbital','misiones espaciales'], c:'Un modelo elegante para pensar la estabilidad en sistemas complejos.', w:'Puntos de Lagrange', s:'puntos de Lagrange' },
+    { id:'criovolcanes', a:'espacio', l:3, t:'Criovolcanes', i:'En lunas heladas como Encélado no sale roca fundida sino agua, amoníaco o metano. La sonda Cassini atravesó los chorros de Encélado y midió lo que expulsan.', q:['¿Cómo puede haber volcanes de hielo en otros mundos?','¿De dónde sale el calor que los alimenta tan lejos del Sol?'], k:['Europa y Encélado','calentamiento por mareas','agua y amoníaco'], c:'Obliga a dejar el molde terrestre para redefinir un fenómeno.', w:'Criovolcán', s:'Encélado' },
+    { id:'auroras', a:'espacio', l:1, t:'Auroras', i:'Partículas cargadas del viento solar quedan guiadas por el campo magnético terrestre y chocan con el oxígeno y el nitrógeno de la alta atmósfera, que emiten luz.', q:['¿Qué partículas producen las auroras?','¿Por qué el verde y el rojo vienen del oxígeno y los tonos violetas del nitrógeno?'], k:['viento solar','magnetosfera','clima espacial'], w:'Aurora polar', s:'auroras boreales' },
+    { id:'lunas-oceano', a:'espacio', l:2, t:'Lunas con océanos', i:'Europa, una luna de Júpiter, y Encélado, de Saturno, esconden océanos de agua líquida bajo capas de hielo. Son de los mejores lugares del sistema solar para buscar vida.', q:['¿Qué cuenta como evidencia indirecta de un océano?','¿Por qué interesan tanto a la astrobiología?'], k:['océanos subterráneos','astrobiología','Europa Clipper y JUICE'], w:'Europa (satélite)', s:'luna Europa Júpiter' },
+    { id:'degenerada', a:'espacio', l:3, t:'Materia degenerada', i:'Una cucharadita de materia de una enana blanca pesaría varias toneladas. Lo que la sostiene no es el calor sino un efecto cuántico: los electrones no pueden ocupar todos el mismo estado.', q:['¿Qué es la presión de degeneración?','¿Qué pasa si la estrella supera el límite de Chandrasekhar?'], k:['principio de exclusión de Pauli','enanas blancas','límite de Chandrasekhar'], w:'Materia degenerada', s:'enanas blancas' },
+    { id:'olbers', a:'espacio', l:1, t:'¿Por qué la noche es oscura?', i:'Si el universo fuera infinito, eterno y lleno de estrellas, cada línea de mirada terminaría en una y el cielo nocturno brillaría. Que la noche sea oscura es una pista sobre la edad del universo.', q:['¿Por qué la edad finita del universo resuelve la paradoja?','¿Qué papel juega la expansión?'], k:['paradoja de Olbers','edad del universo','corrimiento al rojo'], w:'Paradoja de Olbers', s:'paradoja de Olbers' },
+    { id:'neutrinos', a:'espacio', l:3, t:'Neutrinos', i:'Cada segundo te atraviesan unos 65 000 millones de neutrinos del Sol por centímetro cuadrado y casi ninguno interactúa con tu cuerpo.', q:['¿Cómo se detecta algo que casi no interactúa con nada?','¿Qué nos cuentan los neutrinos sobre el interior del Sol?'], k:['partículas fantasma','detectores bajo tierra','oscilación'], w:'Neutrino', s:'neutrinos' },
+    { id:'mareas', a:'espacio', l:1, t:'Mareas', i:'La Luna atrae más al lado de la Tierra que tiene enfrente que al lado opuesto. Esa diferencia estira el planeta y forma dos abultamientos de agua; por eso en muchos lugares hay dos mareas altas por día.', q:['¿Por qué hay marea alta también del lado opuesto a la Luna?','¿Cómo frenan las mareas la rotación de la Tierra?'], k:['fuerza de marea','Luna y Sol','días cada vez más largos'], w:'Marea', s:'mareas Luna' },
+
+    // Historia improbable
+    { id:'calendarios', a:'historia', l:2, t:'Calendarios y poder', i:'En 1582 el papa Gregorio XIII eliminó diez días del calendario para corregir el desfase con las estaciones: al jueves 4 de octubre le siguió el viernes 15. Países protestantes y ortodoxos tardaron siglos en adoptarlo.', q:['¿Por qué medir el tiempo fue siempre una decisión política además de astronómica?','¿Quién gana y quién pierde cuando cambia un estándar?'], k:['reforma gregoriana','coordinación social','estándares'], c:'Un estándar técnico puede ordenar instituciones, el ritmo social y la autoridad.', w:'Calendario gregoriano', s:'calendario gregoriano' },
+    { id:'longitud', a:'historia', l:1, t:'La longitud en el mar', i:'Durante siglos los barcos podían calcular su latitud con el Sol pero no su longitud. La solución fue un reloj que no se atrasara en alta mar: el cronómetro marino de John Harrison, en el siglo XVIII.', q:['¿Por qué la longitud fue mucho más difícil que la latitud?','¿Qué resolvió realmente el cronómetro marino?'], k:['premio de la longitud','cronómetro marino','navegación'], w:'Problema de la longitud', s:'cronómetro marino' },
+    { id:'tulipomania', a:'historia', l:2, t:'Tulipomanía revisada', i:'El gran delirio de los tulipanes en Holanda, en 1637, se repite como ejemplo clásico de burbuja. Investigaciones de archivo sugieren que fue más acotado y menos ruinoso de lo que cuenta la versión popular.', q:['¿Qué parte del relato clásico está inflada?','¿Cómo nace y se propaga un mito histórico?'], k:['burbujas financieras','fuentes de archivo','moralejas'], w:'Tulipomanía', s:'tulipomanía' },
+    { id:'automatas', a:'historia', l:3, t:'Autómatas del siglo XVIII', i:'El escritor de Jaquet-Droz, construido hacia 1770, es un muñeco mecánico que escribe con pluma y tinta un texto programable. Todavía funciona y se exhibe en Neuchâtel, Suiza.', q:['¿Eran ciencia, espectáculo o propaganda?','¿Qué idea de inteligencia materializaban?'], k:['relojería','programación mecánica','el Turco ajedrecista'], w:'Autómata (mecánico)', s:'autómatas' },
+    { id:'baile1518', a:'historia', l:3, t:'La plaga del baile de 1518', i:'En Estrasburgo, en el verano de 1518, decenas de personas bailaron sin parar durante días. Lo registraron crónicas de la época; las explicaciones van desde la histeria colectiva hasta una intoxicación por un hongo del centeno.', q:['¿Cómo se investiga un hecho raro con fuentes de hace 500 años?','¿Qué explicación te convence más y por qué?'], k:['histeria colectiva','fuentes de época','Estrasburgo'], w:'Epidemia de baile de 1518', s:'epidemia de baile' },
+    { id:'islas-fantasma', a:'historia', l:2, t:'Islas que nunca existieron', i:'Durante siglos los mapas incluyeron islas que nadie volvió a encontrar. La isla Sandy, en el Pacífico, figuró en mapas y hasta en Google Earth hasta 2012, cuando un barco pasó por el lugar y solo encontró mar profundo.', q:['¿Cómo entra un error en un mapa y por qué tarda tanto en salir?','¿Qué consecuencias políticas puede tener una isla que no existe?'], k:['islas fantasma','cartografía','autoridad de las fuentes'], w:'Isla fantasma', s:'islas fantasma' },
+    { id:'cleopatra', a:'historia', l:1, t:'Escalas de tiempo engañosas', i:'Cleopatra vivió más cerca en el tiempo de la llegada a la Luna que de la construcción de la Gran Pirámide de Guiza. Solemos comprimir la Antigüedad en un solo bloque.', q:['¿Por qué percibimos la Antigüedad como un solo período?','¿Qué otras comparaciones de fechas te sorprenden?'], k:['cronología','Antiguo Egipto','percepción del tiempo'], w:'Gran Pirámide de Guiza', s:'Cleopatra' },
+
+    // Mente y percepción
+    { id:'sinestesia', a:'mente', l:2, t:'Sinestesia', i:'En algunas personas un estímulo dispara de forma automática y estable otra sensación: letras que tienen color, sonidos que se ven o palabras con sabor.', q:['¿Cómo se cruzan de forma estable color, sonido, letras o sabor en algunas mentes?','¿Cómo se comprueba que no es imaginación ni metáfora?'], k:['percepción cruzada','consistencia en el tiempo','experiencia subjetiva'], c:'Interesa por el acople sistemático entre dominios que solemos separar.', w:'Sinestesia', s:'sinestesia' },
+    { id:'pareidolia', a:'mente', l:1, t:'Pareidolia', i:'Ver caras en enchufes, nubes o frentes de autos. El cerebro prefiere un falso positivo, ver una cara que no está, antes que pasar por alto una que sí está.', q:['¿Es un error perceptivo o una estrategia útil?','¿Dónde ponemos el umbral entre patrón y ruido?'], k:['detección de caras','patrones en el ruido','apofenia'], w:'Pareidolia', s:'pareidolia' },
+    { id:'ceguera-cambio', a:'mente', l:2, t:'El gorila invisible', i:'En un experimento de 1999, la mitad de las personas que contaban pases de básquet en un video no vio a alguien disfrazado de gorila que cruzaba la escena y se golpeaba el pecho. La atención deja afuera mucho más de lo que creemos.', q:['¿Qué dice esto sobre la conciencia visual?','¿Cuánto del entorno procesamos de verdad cuando estamos concentrados?'], k:['ceguera por falta de atención','atención selectiva','ilusión de completitud'], w:'Ceguera por falta de atención', s:'gorila invisible' },
+    { id:'prosopagnosia', a:'mente', l:3, t:'Prosopagnosia', i:'Personas que ven las caras con normalidad pero no las reconocen, a veces ni la propia en una foto. Se estima que alrededor del 2% de la población tiene una forma de nacimiento.', q:['¿Qué enseña sobre el reconocimiento facial?','¿Cómo se compensa en la vida cotidiana?'], k:['ceguera para las caras','giro fusiforme','estrategias de reconocimiento'], w:'Prosopagnosia', s:'prosopagnosia' },
+    { id:'recuerdos-falsos', a:'mente', l:2, t:'Recuerdos falsos', i:'Recordar no es reproducir una grabación: el cerebro reconstruye. En experimentos se logró que personas recordaran con detalle episodios de su infancia que nunca ocurrieron.', q:['¿Cómo se implanta un recuerdo falso?','¿Qué consecuencias tiene para los testimonios en un juicio?'], k:['memoria reconstructiva','Elizabeth Loftus','testigos'], w:'Recuerdo falso', s:'falsos recuerdos' },
+    { id:'suenos-lucidos', a:'mente', l:2, t:'Sueños lúcidos', i:'Sueños en los que la persona sabe que está soñando y a veces puede dirigir lo que pasa. En laboratorio se comprobó con movimientos de ojos pactados antes de dormir, que la persona hace dentro del sueño.', q:['¿Cómo se demuestra desde afuera que alguien sabe que sueña?','¿Qué dicen sobre la conciencia?'], k:['sueño REM','señales oculares','metacognición'], w:'Sueño lúcido', s:'sueños lúcidos' },
+    { id:'disonancia', a:'mente', l:1, t:'Disonancia cognitiva', i:'Cuando lo que hacemos choca con lo que creemos sentimos incomodidad, y muchas veces ajustamos la creencia en lugar de la conducta.', q:['¿En qué decisión tuya reconocés este mecanismo?','¿Qué diferencia hay entre cambiar de opinión y justificarse?'], k:['Festinger','justificación','sesgos'], w:'Disonancia cognitiva', s:'disonancia cognitiva' },
+
+    // Objetos y materiales
+    { id:'vidrio', a:'materiales', l:2, t:'El vidrio, un material raro', i:'El vidrio es un sólido amorfo: sus átomos están desordenados como en un líquido pero quietos como en un sólido. El mito de que los vitrales antiguos son más gruesos abajo porque el vidrio “fluye” es falso: es cosa de cómo se fabricaban.', q:['¿Por qué el vidrio no encaja en las intuiciones simples sobre sólido y líquido?','¿Qué es la transición vítrea?'], k:['estado amorfo','transición vítrea','mito de los vitrales'], c:'Muestra cómo las definiciones técnicas desbordan las categorías cotidianas.', w:'Vidrio', s:'historia del vidrio' },
+    { id:'grafeno', a:'materiales', l:1, t:'Grafeno', i:'Una lámina de carbono de un solo átomo de espesor. Se aisló en 2004 despegando capas de grafito con cinta adhesiva, y el hallazgo ganó el Nobel de Física de 2010. Es muy resistente y conduce muy bien la electricidad, pero fabricarlo a escala sigue siendo difícil.', q:['¿Por qué un material tan prometedor tarda tanto en llegar a productos cotidianos?','¿Qué cambia cuando un material tiene un solo átomo de espesor?'], k:['carbono','Nobel 2010','del laboratorio a la fábrica'], w:'Grafeno', s:'grafeno' },
+    { id:'aerogel', a:'materiales', l:2, t:'Aerogel', i:'Un sólido que es entre 95% y casi 100% aire. Parece humo congelado y aísla tanto que una lámina fina protege una flor de la llama de un soplete.', q:['¿Cómo se fabrica?','¿Por qué aísla tanto?'], k:['secado supercrítico','sílice','aislamiento térmico'], w:'Aerogel', s:'aerogel' },
+    { id:'memoria-forma', a:'materiales', l:3, t:'Metales con memoria', i:'El nitinol, una aleación de níquel y titanio, se puede deformar en frío y recupera su forma original al calentarse. Se usa en stents, ortodoncia y antenas.', q:['¿Qué ocurre a escala cristalina?','¿Qué diferencia hay entre elasticidad y memoria de forma?'], k:['nitinol','martensita y austenita','superelasticidad'], w:'Aleación con memoria de forma', s:'aleaciones con memoria de forma' },
+    { id:'damasco', a:'materiales', l:2, t:'Acero de Damasco', i:'Las espadas de acero de Damasco tenían un dibujo ondulado inconfundible. La técnica original se perdió hacia el siglo XVIII, y en 2006 se encontraron nanotubos de carbono en una hoja antigua.', q:['¿Cómo se pierde una tecnología?','¿Qué cuenta como “redescubrirla”?'], k:['acero wootz','metalurgia','nanoestructuras'], w:'Acero de Damasco', s:'acero de Damasco' },
+    { id:'hormigon-romano', a:'materiales', l:2, t:'Hormigón romano', i:'Muchas estructuras romanas de hormigón siguen en pie después de 2000 años. Un estudio de 2023 atribuye parte de esa durabilidad a fragmentos de cal que sellan las grietas cuando entra agua.', q:['¿Por qué el hormigón moderno dura menos en algunos casos?','¿Qué papel juega la ceniza volcánica?'], k:['puzolana','clastos de cal','autorreparación'], w:'Hormigón romano', s:'hormigón romano' },
+    { id:'no-newtoniano', a:'materiales', l:1, t:'Fluidos no newtonianos', i:'Mezclá maicena con agua: si la apretás rápido se pone dura; si la dejás quieta, fluye. Su viscosidad depende de la fuerza que le aplicás.', q:['¿Qué tiene en común con la arena mojada o el kétchup?','¿Por qué se puede correr sobre una pileta de maicena pero no quedarse quieto?'], k:['viscosidad','espesamiento por cizalla','oobleck'], w:'Fluido no newtoniano', s:'fluidos no newtonianos' },
+
+    // Lenguas y palabras
+    { id:'silbo', a:'lenguaje', l:2, t:'Lenguas silbadas', i:'El silbo gomero, de la isla de La Gomera, en Canarias, transmite el español con silbidos que se oyen a kilómetros. La UNESCO lo declaró Patrimonio Cultural Inmaterial en 2009 y se enseña en las escuelas de la isla.', q:['¿Cómo puede una lengua compleja adaptarse al silbido y seguir siendo inteligible?','¿Qué rasgos del habla se pierden y cuáles bastan?'], k:['silbo gomero','reducción acústica','ecología del habla'], c:'Muestra cómo una lengua se adapta a su paisaje y qué mínimo del habla alcanza para entenderse.', w:'Silbo gomero', s:'silbo gomero' },
+    { id:'guugu', a:'lenguaje', l:3, t:'Sin izquierda ni derecha', i:'Los hablantes de guugu yimithirr, en Australia, describen todo con puntos cardinales: dicen algo como “tenés una hormiga en el pie norte”. Eso los obliga a estar siempre orientados.', q:['¿Cambia la lengua la forma de percibir el espacio?','¿Qué evidencia hay a favor y en contra de la relatividad lingüística?'], k:['marcos de referencia','relatividad lingüística','orientación'], w:'Idioma guugu yimithirr', s:'Sapir Whorf' },
+    { id:'arabismos', a:'lenguaje', l:1, t:'Palabras que vienen del árabe', i:'Unas 4000 palabras del español tienen origen árabe, sobre todo por los ocho siglos de al-Ándalus: aceite, almohada, azúcar, ojalá.', q:['¿Por qué tantas empiezan con “al”?','¿Qué ámbitos de la vida concentran estos préstamos y qué dice eso de la historia?'], k:['arabismos','al-Ándalus','préstamo léxico'], w:'Arabismo', s:'arabismos' },
+    { id:'quipus', a:'lenguaje', l:3, t:'Quipus: escribir con nudos', i:'Los incas registraban censos y tributos con cuerdas anudadas. Se sabe que muchos codifican números en sistema decimal; si también guardaban relatos sigue en discusión.', q:['¿Qué cuenta como escritura?','¿Cómo se descifra un sistema sin una “piedra Rosetta”?'], k:['sistema decimal','administración inca','desciframiento'], w:'Quipu', s:'quipus' },
+    { id:'lenguas-peligro', a:'lenguaje', l:2, t:'Lenguas que se apagan', i:'De las más de 7000 lenguas habladas hoy, alrededor del 40% están en peligro. Cuando una lengua deja de hablarse se pierden también formas de nombrar plantas, parentescos o el tiempo.', q:['¿Por qué una lengua deja de transmitirse?','¿Se puede revivir una lengua? Pensá en el hebreo.'], k:['lenguas en peligro','transmisión entre generaciones','revitalización'], w:'Idioma amenazado', s:'lenguas en peligro' },
+    { id:'senas', a:'lenguaje', l:2, t:'Lenguas de señas', i:'Las lenguas de señas no son mímica ni una versión del idioma oral: tienen gramática propia. La de Argentina y la de España son lenguas distintas.', q:['¿Cómo funciona una gramática hecha en el espacio?','¿Qué pasó con la lengua de señas de Nicaragua, nacida entre los años 70 y 80?'], k:['gramática espacial','LSA y LSE','lengua de señas nicaragüense'], w:'Lengua de señas', s:'lengua de señas' },
+
+    // Números y patrones
+    { id:'cumpleanos', a:'numeros', l:1, t:'La paradoja del cumpleaños', i:'Con solo 23 personas en una sala hay más de 50% de probabilidad de que dos cumplan años el mismo día. Con 70, es casi seguro.', q:['¿Por qué nuestra intuición falla tanto acá?','¿Qué tiene que ver con las colisiones en informática?'], k:['probabilidad','pares posibles','intuición contra cálculo'], w:'Paradoja del cumpleaños', s:'paradoja del cumpleaños' },
+    { id:'benford', a:'numeros', l:2, t:'Ley de Benford', i:'En muchas colecciones de datos reales, como poblaciones, precios o facturas, el primer dígito es 1 en cerca del 30% de los casos y 9 en menos del 5%. Se usa para detectar fraudes contables.', q:['¿Por qué no aparecen todos los dígitos con la misma frecuencia?','¿Qué datos no cumplen esta ley?'], k:['escala logarítmica','auditoría forense','órdenes de magnitud'], w:'Ley de Benford', s:'ley de Benford' },
+    { id:'cantor', a:'numeros', l:3, t:'Infinitos de distinto tamaño', i:'Georg Cantor demostró que hay tantos números pares como números naturales, pero que los números reales son más: hay infinitos más grandes que otros.', q:['¿Qué significa que dos conjuntos tengan el mismo tamaño?','¿Cómo funciona el argumento diagonal?'], k:['Cantor','biyección','argumento diagonal'], w:'Argumento de la diagonal de Cantor', s:'Cantor infinito' },
+    { id:'montyhall', a:'numeros', l:2, t:'El problema de Monty Hall', i:'Tres puertas y un auto detrás de una. Elegís una, el presentador abre otra vacía y te ofrece cambiar. Cambiar te da 2/3 de probabilidad de ganar, aunque parezca 50 y 50.', q:['¿Por qué la información del presentador cambia las probabilidades?','¿Cómo lo comprobarías con una simulación?'], k:['probabilidad condicional','información','simulación'], w:'Problema de Monty Hall', s:'Monty Hall' },
+    { id:'fractales', a:'numeros', l:1, t:'Fractales', i:'Formas que repiten su estructura a distintas escalas: costas, helechos, el brócoli romanesco. La longitud de una costa depende del tamaño de la regla con que se mida.', q:['¿Por qué la costa de un país no tiene una longitud única?','¿Qué es una dimensión fraccionaria?'], k:['autosimilitud','Mandelbrot','paradoja de la costa'], w:'Fractal', s:'fractales matemáticas' },
+    { id:'simpson', a:'numeros', l:3, t:'La paradoja de Simpson', i:'Una tendencia que aparece en cada uno de varios grupos puede invertirse al juntarlos. Pasó con las admisiones de la Universidad de Berkeley en 1973.', q:['¿Cómo puede invertirse una tendencia al agregar los datos?','¿Cuándo conviene separar y cuándo juntar?'], k:['variables de confusión','agregación','causalidad'], w:'Paradoja de Simpson', s:'paradoja de Simpson' },
+    { id:'cigarras', a:'numeros', l:2, t:'Cigarras y números primos', i:'Algunas cigarras de Norteamérica pasan 13 o 17 años bajo tierra y emergen todas juntas. Una hipótesis es que los ciclos de números primos evitan coincidir con los de sus depredadores.', q:['¿Por qué un número primo ayudaría a evitar coincidencias?','¿Qué otras hipótesis compiten?'], k:['cigarras periódicas','números primos','sincronía'], w:'Magicicada', s:'cigarras periódicas' },
+
+    // Cuerpo y medicina
+    { id:'microbiota', a:'cuerpo', l:1, t:'Microbiota intestinal', i:'En el intestino viven billones de bacterias. La cifra famosa de “diez bacterias por cada célula humana” se corrigió en 2016: la proporción real ronda uno a uno.', q:['¿Cómo se corrige una cifra que todos repetían?','¿Qué se sabe con firmeza y qué es todavía promesa?'], k:['microbiota','metagenómica','cifras virales'], w:'Microbiota intestinal', s:'microbiota intestinal' },
+    { id:'placebo', a:'cuerpo', l:2, t:'Placebo y nocebo', i:'Una pastilla sin principio activo puede aliviar el dolor si la persona espera que funcione, y advertir efectos adversos puede provocarlos. Hay estudios de placebo “abierto”, en los que el paciente sabe que lo es.', q:['¿Qué parte del efecto es expectativa y qué parte es la evolución natural de la enfermedad?','¿Es ético usar placebos?'], k:['expectativa','ensayos doble ciego','nocebo'], w:'Efecto placebo', s:'efecto placebo' },
+    { id:'propiocepcion', a:'cuerpo', l:2, t:'Propiocepción', i:'Es el sentido que te dice dónde están tus brazos con los ojos cerrados. Algunas personas que lo perdieron tuvieron que aprender a moverse mirando cada movimiento.', q:['¿Cómo sabés dónde está tu mano sin mirarla?','¿Cuántos sentidos tenemos en realidad?'], k:['husos musculares','esquema corporal','más de cinco sentidos'], w:'Propiocepción', s:'propiocepción' },
+    { id:'hela', a:'cuerpo', l:3, t:'Las células HeLa', i:'En 1951 se tomaron células del tumor de Henrietta Lacks sin su consentimiento. Fueron las primeras células humanas que se multiplicaron sin parar en un laboratorio y sirvieron, entre muchas otras cosas, para probar la vacuna de la polio.', q:['¿Qué cambió en el consentimiento informado desde entonces?','¿A quién pertenecen las células de tu cuerpo?'], k:['línea celular inmortal','bioética','vacuna de la polio'], w:'HeLa', s:'Henrietta Lacks' },
+    { id:'hipo', a:'cuerpo', l:1, t:'El hipo', i:'El hipo es una contracción involuntaria del diafragma seguida del cierre brusco de las cuerdas vocales, que produce el sonido. Su función sigue en discusión; una hipótesis lo relaciona con la respiración de los renacuajos.', q:['¿Por qué cuesta tanto explicar algo tan común?','¿Qué remedios tienen alguna base?'], k:['diafragma','reflejo','restos evolutivos'], w:'Hipo', s:'hipo' },
+    { id:'olfato', a:'cuerpo', l:2, t:'Olores y recuerdos', i:'Un olor puede devolverte de golpe a un recuerdo de la infancia. La vía del olfato llega a las zonas del cerebro ligadas a la emoción y la memoria con menos escalas que los otros sentidos.', q:['¿Por qué los recuerdos que despierta un olor se sienten tan emocionales?','¿Qué se sabe de la pérdida del olfato y la salud?'], k:['efecto Proust','sistema límbico','anosmia'], w:'Olfato', s:'olfato' },
+    { id:'circadiano', a:'cuerpo', l:1, t:'El reloj del cuerpo', i:'Casi todas tus células tienen un reloj interno de unas 24 horas, sincronizado sobre todo por la luz. El descubrimiento de los genes que lo controlan ganó el Nobel de Medicina en 2017.', q:['¿Qué le pasa al reloj interno con el jet lag o el trabajo nocturno?','¿Por qué importaría la luz de las pantallas de noche?'], k:['reloj biológico','melatonina','Nobel 2017'], w:'Ritmo circadiano', s:'ritmo circadiano' },
+
+    // Tierra y clima
+    { id:'sin-verano', a:'tierra', l:2, t:'El año sin verano', i:'En 1816 la erupción del volcán Tambora, ocurrida en Indonesia el año anterior, enfrió el hemisferio norte: nevó en junio en Nueva Inglaterra y hubo hambrunas en Europa. Ese verano lluvioso Mary Shelley empezó a escribir Frankenstein.', q:['¿Cómo puede un volcán enfriar el planeta?','¿Qué conexión hay entre clima, cosechas y cultura?'], k:['aerosoles volcánicos','Tambora','clima e historia'], w:'Año sin verano', s:'año sin verano' },
+    { id:'rios-voladores', a:'tierra', l:2, t:'Ríos en el aire', i:'Los ríos atmosféricos son franjas de vapor de agua de miles de kilómetros; los más intensos llevan hasta quince veces el caudal del Misisipi. En Sudamérica, los “ríos voladores” llevan humedad de la Amazonia hacia el sur y alimentan lluvias en la cuenca del Plata.', q:['¿Cómo se “mueve” un río por el aire?','¿Qué les pasa a las lluvias del sur si se deforesta la Amazonia?'], k:['vapor de agua','ríos voladores','lluvias extremas'], w:'Río atmosférico', s:'ríos voladores' },
+    { id:'wegener', a:'tierra', l:1, t:'La deriva que nadie creyó', i:'En 1912 Alfred Wegener propuso que los continentes se movían. La idea fue rechazada durante décadas porque no tenía un mecanismo; el estudio del fondo oceánico la confirmó en los años 60.', q:['¿Por qué una idea correcta puede rechazarse con razones razonables?','¿Qué evidencia terminó de convencer?'], k:['Pangea','expansión del fondo oceánico','cambio de paradigma'], w:'Deriva continental', s:'deriva continental' },
+    { id:'inversion-magnetica', a:'tierra', l:3, t:'Cuando el norte pasó al sur', i:'El campo magnético de la Tierra se invirtió cientos de veces. La última fue hace unos 780 000 años, y las rocas del fondo marino guardan el registro como un código de barras.', q:['¿Cómo “graban” las rocas el campo magnético?','¿Qué pasaría hoy durante una inversión?'], k:['paleomagnetismo','geodinamo','bandas del fondo oceánico'], w:'Inversión magnética', s:'inversión magnética' },
+    { id:'estromatolitos', a:'tierra', l:2, t:'Estromatolitos', i:'Rocas formadas capa por capa por cianobacterias. Hay fósiles de unos 3500 millones de años y todavía se forman en lugares como Shark Bay, en Australia, o Cuatro Ciénegas, en México.', q:['¿Cómo cambiaron estas bacterias la atmósfera del planeta?','¿Por qué sobreviven en tan pocos lugares hoy?'], k:['cianobacterias','Gran Oxidación','fósiles vivientes'], w:'Estromatolito', s:'estromatolitos' },
+    { id:'arena', a:'tierra', l:1, t:'La arena se está acabando', i:'Es el material sólido más extraído del mundo, sobre todo para hormigón y vidrio. La arena del desierto sirve poco para construir porque el viento pule tanto sus granos que quedan demasiado redondos.', q:['¿Cómo puede escasear algo que parece infinito?','¿Qué consecuencias tiene extraer arena de ríos y costas?'], k:['áridos','construcción','erosión costera'], w:'Arena', s:'escasez de arena' },
+    { id:'cambrica', a:'tierra', l:2, t:'La explosión cámbrica', i:'Hace unos 540 millones de años aparecieron, en relativamente poco tiempo, casi todos los grandes grupos de animales. Fósiles excepcionales como los de Burgess Shale, en Canadá, conservan hasta los tejidos blandos.', q:['¿Fue una explosión real o un efecto del registro fósil?','¿Qué condiciones la hicieron posible?'], k:['Cámbrico','Burgess Shale','evolución animal'], w:'Explosión cámbrica', s:'explosión cámbrica' },
+
+    // Economía y sociedad
+    { id:'yap', a:'sociedad', l:2, t:'El dinero de piedra de Yap', i:'En la isla de Yap, en Micronesia, se usaban como dinero enormes discos de piedra que casi nunca se movían: lo que cambiaba era quién era el dueño, y la comunidad lo recordaba. Se cuenta que una piedra hundida en el mar siguió valiendo.', q:['¿Qué es el dinero si no hace falta moverlo?','¿Qué tiene en común con un registro contable o una cadena de bloques?'], k:['rai','registro social','confianza'], w:'Piedras rai', s:'Yap dinero piedra' },
+    { id:'cobra', a:'sociedad', l:1, t:'El efecto cobra', i:'Se cuenta que en la India colonial se pagaba por cada cobra muerta y la gente empezó a criarlas. La historia es dudosa, pero el patrón es real: un incentivo mal diseñado empeora el problema que quería resolver.', q:['¿Qué ejemplo real de incentivo perverso conocés?','¿Cómo se diseña un incentivo que no se pueda hacer trampa?'], k:['incentivos perversos','ley de Goodhart','consecuencias no buscadas'], w:'Efecto cobra', s:'efecto cobra' },
+    { id:'comunes', a:'sociedad', l:2, t:'La tragedia de los comunes', i:'Cuando un recurso es de todos, cada uno tiene incentivos para usarlo de más. Elinor Ostrom ganó el Nobel de Economía en 2009 mostrando comunidades que lo evitaron con reglas propias.', q:['¿Por qué algunas comunidades sí logran cuidar lo común?','¿Qué recurso común de tu vida diaria está en riesgo?'], k:['bienes comunes','Elinor Ostrom','reglas locales'], w:'Tragedia de los comunes', s:'tragedia de los comunes' },
+    { id:'pengo', a:'sociedad', l:3, t:'La peor inflación de la historia', i:'En 1946 los precios en Hungría se duplicaban cada 15 horas aproximadamente. Es la hiperinflación más alta registrada; llegaron a imprimirse billetes de cien trillones de pengő.', q:['¿Qué hace que una inflación se descontrole?','¿Cómo se termina una hiperinflación?'], k:['emisión monetaria','expectativas','reforma monetaria'], w:'Pengő húngaro', s:'hiperinflación' },
+    { id:'agua-diamantes', a:'sociedad', l:1, t:'Agua y diamantes', i:'El agua es imprescindible y barata; los diamantes son innecesarios y carísimos. La economía resolvió el enigma con la utilidad marginal: lo que cuenta es el valor de la unidad adicional.', q:['¿Por qué un vaso de agua vale más en el desierto?','¿Dónde ves la utilidad marginal en tus propias decisiones?'], k:['utilidad marginal','escasez','Adam Smith'], w:'Paradoja del valor', s:'utilidad marginal' },
+    { id:'contenedor', a:'sociedad', l:2, t:'La caja que cambió el mundo', i:'El contenedor de carga estandarizado, impulsado por Malcom McLean desde 1956, abarató tanto el transporte marítimo que reorganizó la economía mundial y vació los puertos de estibadores.', q:['¿Cómo puede una caja cambiar la geografía de la industria?','¿Quién ganó y quién perdió con la estandarización?'], k:['estandarización','globalización','logística'], w:'Contenedor intermodal', s:'contenedor historia' },
+    { id:'prisionero', a:'sociedad', l:2, t:'El dilema del prisionero', i:'Dos personas que cooperan ganan juntas, pero cada una tiene incentivos para traicionar. En los torneos de programas de computadora de Robert Axelrod, en 1980, ganó la estrategia más simple: “toma y daca”.', q:['¿Por qué cooperar es racional si el juego se repite?','¿Dónde aparece este dilema en la vida real?'], k:['cooperación','juegos repetidos','toma y daca'], w:'Dilema del prisionero', s:'dilema del prisionero' },
+
+    // Arte y sonido
+    { id:'anamorfosis', a:'arte', l:2, t:'Anamorfosis', i:'Una imagen deformada que solo se ve bien desde un punto preciso o con un espejo. El ejemplo más famoso es la calavera oblicua de Los embajadores, de Hans Holbein, pintado en 1533.', q:['¿Cómo recupera sentido una imagen deformada desde una posición específica?','¿Por qué un pintor escondería algo así?'], k:['perspectiva','óptica','lectura situada'], c:'Un gran ejemplo de sentido que depende del punto de vista.', w:'Anamorfosis', s:'Holbein embajadores' },
+    { id:'cage', a:'arte', l:2, t:'4′33″ de John Cage', i:'En 1952 se estrenó una obra en la que el pianista no toca durante cuatro minutos y treinta y tres segundos. La música es lo que suena en la sala: toses, lluvia, una silla que cruje.', q:['¿Es música? ¿Qué define a una obra?','¿Qué cambia cuando prestás atención a los sonidos de fondo?'], k:['silencio','arte conceptual','escucha'], w:'4′33″', s:'John Cage' },
+    { id:'kintsugi', a:'arte', l:1, t:'Kintsugi', i:'Técnica japonesa para reparar cerámica rota con laca y polvo de oro: la grieta no se esconde, se resalta como parte de la historia del objeto.', q:['¿Qué cambia cuando una reparación se muestra en vez de ocultarse?','¿Qué otros objetos o tradiciones valoran el desgaste?'], k:['laca urushi','wabi-sabi','reparación visible'], w:'Kintsugi', s:'kintsugi' },
+    { id:'la440', a:'arte', l:3, t:'¿Por qué el La está en 440?', i:'El La de referencia se fijó en 440 Hz recién en el siglo XX; antes variaba según la ciudad y la época. Hoy, quienes tocan música barroca con criterio histórico suelen afinar más grave, en torno a 415 Hz.', q:['¿Por qué hace falta un estándar para afinar?','¿Qué cambia en el sonido de una orquesta con unos pocos hercios?'], k:['diapasón','temperamento igual','interpretación historicista'], w:'La 440', s:'afinación 440' },
+    { id:'stendhal', a:'arte', l:2, t:'Síndrome de Stendhal', i:'Mareos y palpitaciones frente a obras de arte. Lo describió en 1979 una psiquiatra de Florencia a partir de turistas que atendía, aunque no figura como diagnóstico oficial.', q:['¿Puede el arte provocar síntomas físicos?','¿Qué hace falta para que algo sea un “síndrome”?'], k:['Florencia','turismo','emoción estética'], w:'Síndrome de Stendhal', s:'síndrome de Stendhal' },
+    { id:'ultramar', a:'arte', l:2, t:'El azul más caro', i:'El azul ultramar se obtenía moliendo lapislázuli traído de Afganistán y llegó a costar más que el oro. Por eso en muchas pinturas se reservaba para el manto de la Virgen.', q:['¿Cómo influye el precio de un material en el significado de una obra?','¿Qué cambió cuando se inventó el ultramar sintético, a fines de la década de 1820?'], k:['lapislázuli','pigmentos','economía del arte'], w:'Azul ultramar', s:'lapislázuli' },
+
+    // Técnica e inventos
+    { id:'anticitera', a:'tecnica', l:3, t:'El mecanismo de Anticitera', i:'Un artefacto griego de bronce, de entre los siglos II y I a. C., hallado en un naufragio en 1901. Con decenas de engranajes predecía eclipses y posiciones astronómicas: una computadora analógica de la Antigüedad.', q:['¿Cómo se reconstruye un mecanismo corroído y partido en 82 fragmentos?','¿Por qué no conocemos otro aparato así durante más de mil años?'], k:['engranajes','astronomía griega','tomografía'], w:'Mecanismo de Anticitera', s:'mecanismo de Anticitera' },
+    { id:'qr', a:'tecnica', l:2, t:'Códigos que se reparan', i:'Un código QR se puede leer aunque falte hasta un 30% de su superficie, gracias a los códigos de Reed-Solomon, los mismos que protegían la música de los CD.', q:['¿Cómo puede un mensaje repararse a sí mismo?','¿Dónde más se usa la corrección de errores?'], k:['redundancia','Reed-Solomon','información'], w:'Código QR', s:'código QR' },
+    { id:'qwerty', a:'tecnica', l:1, t:'¿Por qué el teclado es QWERTY?', i:'La distribución QWERTY viene de las máquinas de escribir de la década de 1870. La historia de que se diseñó para frenar a los mecanógrafos es discutida; lo seguro es que se quedó por costumbre y por lo caro que es cambiar.', q:['¿Por qué un estándar sobrevive aunque haya alternativas?','¿Qué es la dependencia de la trayectoria?'], k:['dependencia de la trayectoria','estándares','máquina de escribir'], w:'Teclado QWERTY', s:'teclado QWERTY' },
+    { id:'imprenta', a:'tecnica', l:1, t:'La imprenta de Gutenberg', i:'Hacia 1450, Johannes Gutenberg combinó tipos metálicos móviles, una prensa parecida a las de uva y una tinta al aceite. En China y Corea ya se imprimía con tipos móviles desde siglos antes.', q:['¿Por qué la imprenta cambió Europa tan rápido, si en Asia existía antes?','¿Qué se parece hoy a ese salto en la circulación de información?'], k:['tipos móviles','Bi Sheng y Corea','circulación de ideas'], w:'Imprenta', s:'imprenta Gutenberg' },
+    { id:'husos', a:'tecnica', l:1, t:'Quién decide qué hora es', i:'Hasta el siglo XIX cada ciudad tenía su propia hora solar. Los ferrocarriles necesitaban horarios comunes y así nacieron los husos horarios. Argentina usa UTC−3 aunque por su longitud le correspondería, en su mayor parte, UTC−4.', q:['¿Quién decide qué hora es?','¿Qué efectos tiene vivir con la hora adelantada respecto del Sol?'], k:['tiempo solar','ferrocarriles','meridiano de Greenwich'], w:'Huso horario', s:'husos horarios' },
+    { id:'enigma', a:'tecnica', l:2, t:'La máquina Enigma', i:'La máquina de cifrado alemana de la Segunda Guerra Mundial. Un grupo de matemáticos polacos la quebró primero, en 1932; después, en Bletchley Park, Alan Turing y su equipo automatizaron el descifrado.', q:['¿Qué errores humanos ayudaron a romperla?','¿Qué diferencia hay entre cifrar y ocultar?'], k:['criptografía','Marian Rejewski','Alan Turing'], w:'Enigma (máquina)', s:'máquina Enigma' },
+    { id:'reloj-atomico', a:'tecnica', l:3, t:'Relojes atómicos', i:'Desde 1967 el segundo se define por las oscilaciones del átomo de cesio: 9 192 631 770 ciclos. Sin relojes así no funcionaría el GPS, que además tiene que corregir efectos de la relatividad.', q:['¿Por qué el GPS necesita la relatividad?','¿Qué es un segundo intercalar?'], k:['cesio','GPS','relatividad'], w:'Reloj atómico', s:'reloj atómico' },
+  ].map((t, n) => ({ ...t, kind:'bank', n:n+1 }));
+
+  const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+  const WEEK_IDS = ['bioluminiscencia','criptobiosis','lagrange','micelio','vidrio','sinestesia','calendarios','bandadas','fermentacion','criovolcanes','anamorfosis','silbo'];
+  const LEVELS = ['', 'suave', 'media', 'alta'];
+  const INTERVALS = [1, 3, 7, 16, 35, 90];
+  const SESSIONS = {
+    20: [['listen',10,'Escuchar','un episodio corto o los primeros 10 minutos de uno largo'],['read',5,'Leer','la lectura rápida'],['write',5,'Escribir','tu frase, con palabras propias']],
+    45: [['listen',20,'Escuchar','un episodio entero'],['read',15,'Leer','Wikipedia y una segunda fuente'],['think',5,'Pensar','respondé una pregunta y anotá una objeción'],['write',5,'Escribir','tu frase']],
+    90: [['listen',40,'Escuchar','uno o dos episodios'],['read',25,'Leer','compará dos fuentes: ¿coinciden?'],['think',15,'Pensar','respondé todas las preguntas'],['write',10,'Escribir','una mini ficha de 200 palabras']],
+  };
+
+  /* ===================== Utilidades ===================== */
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  const safeUrl = u => { try { const x = new URL(u); return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href : ''; } catch (e) { return ''; } };
+  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const hash = s => { let h = 2166136261; for (const ch of s) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+
+  const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const parseDay = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+  const addDays = (k, n) => { const d = parseDay(k); d.setDate(d.getDate() + n); return dayKey(d); };
+  const diffDays = (a, b) => Math.round((Date.UTC(...ymd(b)) - Date.UTC(...ymd(a))) / 864e5);
+  const ymd = k => { const [y, m, d] = k.split('-').map(Number); return [y, m - 1, d]; };
+  const mondayOf = k => { const d = parseDay(k); return addDays(k, -((d.getDay() + 6) % 7)); };
+  const fmtDay = (k, opts = { day:'numeric', month:'short' }) => parseDay(k).toLocaleDateString('es-AR', opts);
+  const fmtTime = s => { if (!isFinite(s) || s < 0) s = 0; s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = String(s % 60).padStart(2, '0'); return h ? `${h}:${String(m).padStart(2, '0')}:${x}` : `${m}:${x}`; };
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+  const ICON = {
+    play:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
+    pause:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+    out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>',
+    system:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>',
+    light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    dark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  };
+
+  /* ===================== Estado y almacenamiento ===================== */
+
+  const STORE_KEY = 'rlw.v2';
+  function defaultState() {
+    return { v:2, theme:'system', langs:'es', rate:1, filters:{ area:'todas', level:'0', time:'45' },
+      current:null, daily:{}, seen:{}, learned:{}, saved:{}, drafts:{}, activity:{}, listened:{}, reviews:0,
+      planStart: mondayOf(dayKey()) };
+  }
+  function loadState() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STORE_KEY));
+      if (raw && raw.v === 2) return { ...defaultState(), ...raw, filters:{ ...defaultState().filters, ...(raw.filters || {}) } };
+    } catch (e) { console.debug('rlw: no se pudo leer el progreso', e); }
+    return defaultState();
+  }
+  let S = loadState();
+  let saveTimer = null;
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); }
+      catch (e) { console.debug('rlw: no se pudo guardar', e); purgeCache(); }
+    }, 150);
+  }
+  function saveNow() { clearTimeout(saveTimer); try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { console.debug('rlw: guardar', e); } }
+
+  const cache = {
+    get(k) { try { const o = JSON.parse(localStorage.getItem('rlw.c.' + k)); return o && o.exp > Date.now() ? o.v : null; } catch (e) { return null; } },
+    set(k, v, days) { try { localStorage.setItem('rlw.c.' + k, JSON.stringify({ v, exp: Date.now() + days * 864e5 })); } catch (e) { console.debug('rlw: caché llena', e); purgeCache(); } },
+  };
+  function purgeCache() {
+    try { Object.keys(localStorage).filter(k => k.startsWith('rlw.c.')).forEach(k => localStorage.removeItem(k)); }
+    catch (e) { console.debug('rlw: purgar caché', e); }
+  }
+  function pruneCache() {
+    try {
+      for (const k of Object.keys(localStorage)) {
+        if (!k.startsWith('rlw.c.')) continue;
+        let o = null;
+        try { o = JSON.parse(localStorage.getItem(k)); } catch (e) { console.debug('rlw: caché ilegible', e); }
+        if (!o || !(o.exp > Date.now())) localStorage.removeItem(k);
+      }
+    } catch (e) { console.debug('rlw: podar caché', e); }
+  }
+
+  function bumpActivity() { const k = dayKey(); S.activity[k] = (S.activity[k] || 0) + 1; save(); renderStreak(); }
+
+  /* ===================== Red ===================== */
+
+  async function getJSON(url, timeout = 12000) {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), timeout);
+    try {
+      const r = await fetch(url, { signal: ctl.signal });
+      if (r.status === 403 || r.status === 429) { const e = new Error('limit'); e.limit = true; throw e; }
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return await r.json();
+    } finally { clearTimeout(t); }
+  }
+
+  const WIKI_API = 'https://es.wikipedia.org/w/api.php';
+  const wikiUrl = params => WIKI_API + '?' + new URLSearchParams({ action:'query', format:'json', formatversion:'2', origin:'*', ...params });
+
+  async function wikiSummary(title) {
+    const key = 'wk:' + title;
+    const hit = cache.get(key);
+    if (hit) return hit;
+    const base = { prop:'extracts|pageimages|info', exintro:'1', explaintext:'1', exsentences:'5', piprop:'thumbnail', pithumbsize:'640', inprop:'url', redirects:'1' };
+    const d = await getJSON(wikiUrl({ ...base, titles: title }));
+    const p = d.query && d.query.pages && d.query.pages[0];
+    if (!p || p.missing || !p.extract) throw new Error('sin resumen');
+    const out = { title: p.title, text: p.extract, img: p.thumbnail ? p.thumbnail.source : '', url: p.fullurl };
+    cache.set(key, out, 30);
+    return out;
+  }
+
+  const WIKI_CATS = [['Categoría:Wikipedia:Artículos destacados', 'destacado'], ['Categoría:Wikipedia:Artículos buenos', 'bueno']];
+  async function wikiRandomTopic() {
+    const [cat, label] = Math.random() < 0.45 ? WIKI_CATS[0] : WIKI_CATS[1];
+    const prefix = pick('ABCDEFGHILMNOPRSTV'.split('')) + (Math.random() < 0.7 ? pick('aeioulrn'.split('')) : '');
+    const d = await getJSON(wikiUrl({ generator:'categorymembers', gcmtitle: cat, gcmnamespace:'0', gcmlimit:'15', gcmstartsortkeyprefix: prefix,
+      prop:'extracts|pageimages|info', exintro:'1', explaintext:'1', exsentences:'4', exlimit:'15', piprop:'thumbnail', pithumbsize:'640', inprop:'url' }));
+    const pages = ((d.query && d.query.pages) || []).filter(p => p.extract && p.extract.length > 140 && !S.learned['wiki:' + p.pageid]);
+    if (!pages.length) throw new Error('sin artículos');
+    const p = pick(pages);
+    return wikiTopicFrom({ id:'wiki:' + p.pageid, t: p.title, i: p.extract, img: p.thumbnail ? p.thumbnail.source : '', url: p.fullurl, cat: label });
+  }
+  function wikiTopicFrom(o) {
+    const clean = o.t.replace(/\s*\(.*?\)\s*/g, ' ').trim();
+    return { kind:'wiki', id:o.id, t:o.t, i:o.i, img:o.img || '', url:o.url, cat:o.cat || 'destacado', w:o.t, s:clean, l:0, a:'wiki',
+      q:[`¿Qué es lo más sorprendente de «${o.t}» y por qué?`, '¿Con qué tema que ya conocés se conecta?', '¿Qué dato del artículo verificarías en otra fuente antes de repetirlo?'], k:[] };
+  }
+
+  /* ----- episodios: catálogo público de Apple Podcasts ----- */
+
+  const LANG_WORDS = {
+    es:'el los las del y más también qué cómo cuándo dónde pero hay sus muy nos hoy desde hasta fue ella ellos puede tiene aquí así año años nuestro nuestra esto eso cuando porque entre',
+    en:'the and of with is this that how what from about you are we our was were into their they its which',
+    pt:'não você uma com dos das são isso mais pelo pela também muito ao às nós então',
+    it:'il della che gli sono nel anche questo perché delle degli non è le dei nella sulla alla questa',
+    fr:'les des est et du dans qui avec pour cette sont pas nous vous',
+    de:'der die und das ist nicht mit sich auf ein eine den zu von wir ich',
+  };
+  const LANG_SETS = Object.fromEntries(Object.entries(LANG_WORDS).map(([k, v]) => [k, new Set(v.split(' '))]));
+  function detectLang(text) {
+    const toks = String(text || '').toLowerCase().match(/[a-záéíóúüñàèìòùâêôãõçäöß]+/g) || [];
+    const sc = {};
+    for (const l in LANG_SETS) sc[l] = 0;
+    for (const w of toks) for (const l in LANG_SETS) if (LANG_SETS[l].has(w)) sc[l]++;
+    let best = '?', bv = 0;
+    for (const l in sc) if (sc[l] > bv) { bv = sc[l]; best = l; }
+    if (bv >= 2) return best;
+    return bv === 1 ? best + '?' : '?';
+  }
+  const STOP = new Set(['de','la','el','los','las','y','en','del','un','una','con','por','para','que','al','lo','se','su']);
+  const termsOf = q => norm(q).split(/[^a-z0-9]+/).filter(w => w.length > 2 && !STOP.has(w));
+  // Cuántos términos de la búsqueda aparecen en el título del episodio y cuántos entre título y descripción.
+  // Cada término se busca al comienzo de una palabra (los cortos, como palabra entera), tolerando plurales.
+  function relevance(query, it) {
+    const ts = termsOf(query);
+    if (!ts.length) return { ti: 1, cov: 1, nt: 1, ph: 0, pd: 0 };
+    const title = norm(it.trackName), desc = norm(`${it.description || ''} ${it.shortDescription || ''}`);
+    let ti = 0, cov = 0;
+    for (const w of ts) {
+      const re = w.length <= 4 ? new RegExp(`\\b${w}s?\\b`) : new RegExp(`\\b${w.length > 5 ? w.slice(0, w.length - 2) : w}`);
+      const a = re.test(title), b = re.test(desc);
+      if (a) ti++;
+      if (a || b) cov++;
+    }
+    const phrase = norm(query);
+    return { ti, cov, nt: ts.length, ph: title.includes(phrase) ? 1 : 0, pd: desc.includes(phrase) ? 1 : 0 };
+  }
+  // Géneros de Apple Podcasts: ciencia, historia, educación, documental, sociedad, arte, tecnología, medicina, música.
+  const GOOD_GENRES = new Set([1533,1534,1535,1536,1537,1538,1539,1540,1541,1542,1487,1304,1501,1543,1443,1324,1301,1405,1406,1482,1402,1318,1518,1310,1523,1524]);
+  // Autoayuda, "cómo hacer", religión y espiritualidad, salud alternativa, marketing, emprendimiento, crimen real, ficción.
+  const BAD_GENRES = new Set([1500,1499,1314,1438,1439,1463,1440,1441,1532,1444,1513,1492,1493,1488,1483,1484,1485,1486]);
+  // strict: para títulos de Wikipedia, que suelen ser genéricos, la frase exacta tiene que aparecer siempre.
+  function quality(e, strict) {
+    if (!e.nt || e.cov < e.nt) return null;
+    // Si el título no tiene todas las palabras, la frase completa tiene que aparecer tal cual en el título o la descripción.
+    if (e.nt > 1 && (strict || e.ti < e.nt) && !e.ph && !e.pd) return null;
+    const good = e.g.some(x => GOOD_GENRES.has(x)), bad = e.g.some(x => BAD_GENRES.has(x));
+    if (bad && e.ti < e.nt) return null;
+    if (e.ti === 0 && !good) return null;
+    return e.ti * 3 + e.cov + (e.nt > 1 && e.ph ? 4 : 0) + (good ? 3 : 0);
+  }
+
+  async function fetchEpisodes(query) {
+    const key = 'ep4:' + norm(query);
+    const hit = cache.get(key);
+    if (hit) return hit;
+    const urls = ['es', 'mx'].map(c => 'https://itunes.apple.com/search?' + new URLSearchParams({ term: query, media:'podcast', entity:'podcastEpisode', country: c, limit:'30' }));
+    const settled = await Promise.allSettled(urls.map(u => getJSON(u)));
+    const ok = settled.filter(r => r.status === 'fulfilled');
+    if (!ok.length) throw settled[0].reason;
+    const seen = new Set(), eps = [];
+    for (const r of ok) for (const it of (r.value.results || [])) {
+      const audio = safeUrl(it.episodeUrl);
+      if (!audio) continue;
+      const dupe = norm(it.trackName) + '|' + norm(it.collectionName);
+      if (seen.has(it.trackId) || seen.has(dupe)) continue;
+      seen.add(it.trackId); seen.add(dupe);
+      eps.push({ id: String(it.trackId), t: it.trackName || 'Episodio', show: it.collectionName || '', audio, page: safeUrl(it.trackViewUrl),
+        ms: it.trackTimeMillis || 0, date: (it.releaseDate || '').slice(0, 10), art: safeUrl(it.artworkUrl160 || it.artworkUrl60 || ''),
+        lang: detectLang(`${it.trackName} ${it.description || it.shortDescription || ''}`), g: (it.genres || []).map(x => +x.id),
+        ...relevance(query, it) });
+    }
+    cache.set(key, eps, 7);
+    return eps;
+  }
+  function rankEpisodes(eps, time, langs, strict) {
+    const allow = l => l === 'es' || l === 'es?' || (langs === 'es+en' && (l === 'en' || l === 'en?'));
+    const budget = (SESSIONS[time] || SESSIONS[45])[0][1];
+    return eps.filter(e => allow(e.lang)).map(e => {
+      const q = quality(e, strict);
+      if (q === null) return null;
+      const min = e.ms / 60000;
+      const fit = !min ? 0 : min <= budget * 1.5 ? 2 : min <= budget * 3 ? 1 : -1;
+      const age = e.date ? (Date.now() - Date.parse(e.date)) / (365 * 864e5) : 8;
+      return { ...e, score: q * 2 + fit + (e.lang.startsWith('es') ? 2 : 0) - Math.min(age, 10) * 0.12 };
+    }).filter(Boolean).sort((a, b) => b.score - a.score);
+  }
+
+  const searchLinks = q => {
+    const e = encodeURIComponent(q);
+    return [
+      ['Apple Podcasts', `https://podcasts.apple.com/es/search?term=${e}`],
+      ['Spotify', `https://open.spotify.com/search/${e}/episodes`],
+      ['YouTube', `https://www.youtube.com/results?search_query=${encodeURIComponent(q + ' podcast')}`],
+      ['Podcast Index', `https://podcastindex.org/search?q=${e}&type=all`],
+    ];
+  };
+  const readLinks = t => [
+    ['Wikipedia', t.kind === 'wiki' && t.url ? t.url : `https://es.wikipedia.org/w/index.php?search=${encodeURIComponent(t.w)}`],
+    ['Videos de divulgación', `https://www.youtube.com/results?search_query=${encodeURIComponent(t.s + ' divulgación')}`],
+    ['Google Académico', `https://scholar.google.com/scholar?hl=es&q=${encodeURIComponent(t.w)}`],
+  ];
+  const showUrl = id => `https://podcasts.apple.com/es/podcast/id${id}`;
+
+  /* ===================== Elegir temas ===================== */
+
+  function poolFor(f) {
+    return TOPICS.filter(t => (f.area === 'todas' || t.a === f.area) && (f.level === '0' || String(t.l) === f.level));
+  }
+  function pickTopic(f, exclude) {
+    let pool = poolFor(f);
+    if (!pool.length) pool = TOPICS.filter(t => f.area === 'todas' || t.a === f.area);
+    const others = pool.filter(t => t.id !== exclude);
+    const fresh = others.filter(t => !S.seen[t.id] && !S.learned[t.id]);
+    const notLearned = others.filter(t => !S.learned[t.id]);
+    return pick(fresh.length ? fresh : notLearned.length ? notLearned : others.length ? others : pool);
+  }
+  function dailyTopic() {
+    const k = dayKey();
+    if (S.daily.date === k && TOPIC_BY_ID[S.daily.id]) return TOPIC_BY_ID[S.daily.id];
+    const fresh = TOPICS.filter(t => !S.learned[t.id] && !S.seen[t.id]);
+    const notLearned = TOPICS.filter(t => !S.learned[t.id]);
+    const list = fresh.length ? fresh : notLearned.length ? notLearned : TOPICS;
+    const t = list[hash(k) % list.length];
+    S.daily = { date: k, id: t.id };
+    save();
+    return t;
+  }
+  function currentTopic() {
+    const c = S.current;
+    if (c && c.day === dayKey()) {
+      if (c.kind === 'wiki' && c.data) return { topic: wikiTopicFrom(c.data), src: c.src };
+      if (TOPIC_BY_ID[c.id]) return { topic: TOPIC_BY_ID[c.id], src: c.src };
+    }
+    return { topic: dailyTopic(), src: 'daily' };
+  }
+  function setCurrent(topic, src) {
+    S.current = topic.kind === 'wiki'
+      ? { day: dayKey(), kind:'wiki', src, data:{ id: topic.id, t: topic.t, i: topic.i, img: topic.img, url: topic.url, cat: topic.cat } }
+      : { day: dayKey(), kind:'bank', src, id: topic.id };
+    save();
+  }
+  const SRC_LABEL = { daily:'Tema de hoy', random:'Elegido al azar', wild:'Modo insolente', wiki:'Tema infinito', plan:'Del plan de 12 semanas', saved:'De tus guardados', history:'De tu historial', review:'Desde el repaso' };
+
+  function snapshot(t) {
+    const base = { key: t.id, kind: t.kind, t: t.t, a: t.a };
+    return t.kind === 'wiki' ? { ...base, data:{ id: t.id, t: t.t, i: t.i, img: t.img, url: t.url, cat: t.cat } } : base;
+  }
+  function topicFromSnap(sn) {
+    if (sn.kind === 'wiki' && sn.data) return wikiTopicFrom(sn.data);
+    return TOPIC_BY_ID[sn.key] || null;
+  }
+
+  /* ===================== Render: Hoy ===================== */
+
+  let renderSeq = 0;
+  let epMap = new Map();
+
+  function chipHTML(t) {
+    if (t.kind === 'wiki') return `<span class="chip chip-wiki">Wikipedia · artículo ${esc(t.cat)}</span>`;
+    const A = AREAS[t.a];
+    return `<span class="chip" style="--h:${A.h}">${esc(A.n)}</span>`;
+  }
+  function rarezaHTML(l) {
+    if (!l) return '';
+    return `<span class="rareza" title="Rareza ${LEVELS[l]}"><span class="dots" aria-hidden="true">${'●'.repeat(l)}${'○'.repeat(3 - l)}</span>rareza ${LEVELS[l]}</span>`;
+  }
+  function sessionHTML(time) {
+    const steps = SESSIONS[time] || SESSIONS[45];
+    const total = steps.reduce((s, x) => s + x[1], 0);
+    return `<div class="timeline" aria-hidden="true">${steps.map(([k, m]) => `<span class="seg-${k}" style="width:${(m / total * 100).toFixed(2)}%"></span>`).join('')}</div>
+      <ul class="steps">${steps.map(([k, m, name, what]) => `<li><span class="sw seg-${k}" aria-hidden="true"></span><span class="min">${m}′</span><span class="what"><b>${name}:</b> ${esc(what)}</span></li>`).join('')}</ul>`;
+  }
+
+  function renderHoy() {
+    $('#today-date').textContent = new Date().toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+    const { topic, src } = currentTopic();
+    renderTopic(topic, src);
+  }
+
+  function renderTopic(t, src) {
+    const seq = ++renderSeq;
+    const time = S.filters.time;
+    const key = t.id;
+    if (t.kind === 'bank' && !S.seen[key]) { S.seen[key] = dayKey(); save(); }
+    const learned = S.learned[key];
+    const saved = S.saved[key];
+    const shows = t.kind === 'wiki' ? ['natgeo', 'hombros'] : AREAS[t.a].shows;
+    const draft = S.drafts[key] || (learned ? learned.note : '') || '';
+
+    $('#topic').innerHTML = `
+      <article class="ficha" aria-labelledby="ficha-title">
+        <div class="ficha-head">${chipHTML(t)}${rarezaHTML(t.l)}<span class="ficha-src">${esc(SRC_LABEL[src] || '')}</span>
+          ${t.kind === 'bank' ? `<span class="ficha-no">FICHA Nº ${String(t.n).padStart(3, '0')}</span>` : ''}</div>
+        <h2 class="ficha-title" id="ficha-title" tabindex="-1">${esc(t.t)}</h2>
+        ${t.img ? `<img class="ficha-img" src="${esc(safeUrl(t.img))}" alt="" loading="lazy">` : ''}
+        <p class="ficha-intro">${esc(t.i)}</p>
+        ${learned ? `<p class="done-badge">${ICON.check} Aprendido el ${esc(fmtDay(learned.at))} · próximo repaso ${learned.due ? esc(fmtDay(learned.due)) : 'ninguno: dominado'}</p>` : ''}
+
+        <section class="block" aria-labelledby="b-q">
+          <h3 class="label" id="b-q">Preguntas para pensar</h3>
+          <ol class="questions">${t.q.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
+          ${t.k && t.k.length ? `<div class="tags">${t.k.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</div>` : ''}
+        </section>
+        ${t.c ? `<section class="block" aria-labelledby="b-c"><h3 class="label" id="b-c">Conexión</h3><p>${esc(t.c)}</p></section>` : ''}
+
+        <section class="block" aria-labelledby="b-s">
+          <h3 class="label" id="b-s">Tu sesión de ${esc(time)} minutos</h3>
+          ${sessionHTML(time)}
+        </section>
+
+        <section class="block" aria-labelledby="b-l">
+          <h3 class="label" id="b-l">Para escuchar</h3>
+          <p class="hint">Episodios gratuitos sobre este tema, ordenados para tus ${esc(time)} minutos. Se escuchan acá mismo.</p>
+          <div id="episodes" aria-live="polite"><div class="eps"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></div>
+          <p class="subhead">Buscar el tema en otras apps</p>
+          <div class="linkrow">${searchLinks(t.s).map(([n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(n)}${ICON.out}</a>`).join('')}</div>
+          <p class="subhead">Programas gratuitos ${t.kind === 'wiki' ? 'de divulgación' : 'del área'}</p>
+          <ul class="shows">${shows.map(id => { const sh = SHOWS[id]; return `<li><a href="${esc(showUrl(sh.id))}" target="_blank" rel="noopener noreferrer"><b>${esc(sh.n)}</b><span>${esc(sh.by)}</span></a></li>`; }).join('')}</ul>
+        </section>
+
+        <section class="block" aria-labelledby="b-r">
+          <h3 class="label" id="b-r">Lectura rápida</h3>
+          ${t.kind === 'wiki' ? '' : `<div class="extract loading" id="extract">Cargando el resumen de Wikipedia…</div>`}
+          <div class="linkrow">${readLinks(t).map(([n, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(n)}${ICON.out}</a>`).join('')}</div>
+        </section>
+
+        <section class="block">
+          <label class="label" for="note">En una frase: ¿qué aprendiste?</label>
+          <textarea id="note" class="note" rows="4" placeholder="Explicalo como si se lo contaras a alguien que no sabe nada del tema.">${esc(draft)}</textarea>
+          <p class="hint note-hint" id="note-hint" hidden>Escribí tu frase primero: es lo que vas a repasar después. Si igual querés seguir, tocá de nuevo.</p>
+        </section>
+
+        <div class="ficha-actions">
+          <button class="btn btn-primary" id="btn-learned" type="button">${learned ? 'Actualizar mi frase' : 'Lo aprendí'}</button>
+          <button class="btn" id="btn-save" type="button" aria-pressed="${saved ? 'true' : 'false'}">${saved ? 'Guardado ✓' : 'Para después'}</button>
+          <button class="btn btn-ghost" id="btn-share" type="button">Compartir</button>
+        </div>
+      </article>`;
+
+    $('#btn-daily').hidden = src === 'daily';
+    wireTopic(t);
+    loadEpisodes(t, seq);
+    if (t.kind !== 'wiki') loadExtract(t, seq);
+    renderPoolInfo();
+  }
+
+  function wireTopic(t) {
+    const note = $('#note');
+    let warned = false;
+    note.addEventListener('input', () => { S.drafts[t.id] = note.value; save(); $('#note-hint').hidden = true; });
+    $('#btn-learned').addEventListener('click', () => {
+      const text = note.value.trim();
+      if (!text && !warned && !S.learned[t.id]) { warned = true; $('#note-hint').hidden = false; note.focus(); return; }
+      markLearned(t, text);
+    });
+    $('#btn-save').addEventListener('click', e => {
+      if (S.saved[t.id]) { delete S.saved[t.id]; e.currentTarget.textContent = 'Para después'; e.currentTarget.setAttribute('aria-pressed', 'false'); toast('Lo sacaste de guardados'); }
+      else { S.saved[t.id] = { ...snapshot(t), at: dayKey() }; e.currentTarget.textContent = 'Guardado ✓'; e.currentTarget.setAttribute('aria-pressed', 'true'); toast('Guardado en Repaso › Para después'); }
+      save();
+    });
+    $('#btn-share').addEventListener('click', () => shareTopic(t));
+  }
+
+  async function loadExtract(t, seq) {
+    const box = $('#extract');
+    try {
+      const w = await wikiSummary(t.w);
+      if (seq !== renderSeq) return;
+      box.classList.remove('loading');
+      box.textContent = w.text;
+      const link = $$('.linkrow a', box.parentElement).find(a => a.textContent.startsWith('Wikipedia'));
+      if (link && w.url) link.href = w.url;
+    } catch (e) {
+      console.debug('rlw: resumen', e);
+      if (seq !== renderSeq) return;
+      box.textContent = e && e.message === 'sin resumen'
+        ? 'Wikipedia no tiene un resumen para este título. Podés buscarlo con el enlace de abajo.'
+        : 'No se pudo cargar el resumen (¿sin conexión?). Podés abrir el artículo con el enlace de abajo.';
+    }
+  }
+
+  async function loadEpisodes(t, seq) {
+    const box = $('#episodes');
+    try {
+      const all = await fetchEpisodes(t.s);
+      if (seq !== renderSeq) return;
+      const strict = t.kind === 'wiki';
+      const list = rankEpisodes(all, S.filters.time, S.langs, strict);
+      if (!list.length) {
+        const english = S.langs === 'es' ? rankEpisodes(all, S.filters.time, 'es+en', strict).length : 0;
+        box.innerHTML = `<p class="episodes-msg">No encontré episodios en español sobre este tema en el catálogo de podcasts.${english ? ` Hay ${plural(english, 'episodio', 'episodios')} en inglés: <button class="link-btn" type="button" id="btn-try-en">mostrarlos</button>.` : ' Probá con los buscadores de abajo o con los programas del área.'}</p>`;
+        const b = $('#btn-try-en');
+        if (b) b.addEventListener('click', () => { S.langs = 'es+en'; save(); syncSettings(); loadEpisodes(t, renderSeq); });
+        return;
+      }
+      epMap = new Map(list.map(e => [e.id, e]));
+      const top = list.slice(0, 5), more = list.slice(5, 12);
+      box.innerHTML = `<ul class="eps" id="eps-list">${top.map(epHTML).join('')}</ul>
+        ${more.length ? `<p style="margin-top:6px"><button class="link-btn" type="button" id="btn-more-eps">Ver ${plural(more.length, 'episodio más', 'episodios más')}</button></p>` : ''}`;
+      const mb = $('#btn-more-eps');
+      if (mb) mb.addEventListener('click', () => { $('#eps-list').insertAdjacentHTML('beforeend', more.map(epHTML).join('')); mb.remove(); });
+    } catch (e) {
+      console.debug('rlw: episodios', e);
+      if (seq !== renderSeq) return;
+      box.innerHTML = `<p class="episodes-msg">${e && e.limit ? 'El catálogo de podcasts pidió una pausa por exceso de búsquedas. Esperá un minuto y' : 'No pude buscar episodios (¿sin conexión?).'} <button class="link-btn" type="button" id="btn-retry-eps">Reintentar</button></p>`;
+      $('#btn-retry-eps').addEventListener('click', () => { box.innerHTML = '<div class="eps"><div class="skel"></div><div class="skel"></div></div>'; loadEpisodes(t, renderSeq); });
+    }
+  }
+
+  function epHTML(e) {
+    const min = e.ms ? Math.max(1, Math.round(e.ms / 60000)) + ' min' : '';
+    const yr = e.date ? e.date.slice(0, 4) : '';
+    const playing = nowPlaying && nowPlaying.id === e.id && !audio.paused;
+    const meta = [esc(e.show), min, yr].filter(Boolean).join(' · ')
+      + (e.lang.startsWith('en') ? ' · <span class="en">en inglés</span>' : '')
+      + (S.listened[e.id] ? ' · <span class="ok">escuchado</span>' : '');
+    return `<li class="ep${nowPlaying && nowPlaying.id === e.id ? ' playing' : ''}" data-ep="${esc(e.id)}">
+      <button class="ep-play" type="button" data-play="${esc(e.id)}" aria-label="${playing ? 'Pausar' : 'Escuchar'}: ${esc(e.t)}">
+        ${e.art ? `<img src="${esc(e.art)}" alt="" loading="lazy" width="44" height="44">` : ''}<span class="ic">${playing ? ICON.pause : ICON.play}</span></button>
+      <div class="ep-body"><p class="ep-title">${esc(e.t)}</p><p class="ep-meta">${meta}</p></div>
+      ${e.page ? `<a class="ep-link" href="${esc(e.page)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir en Apple Podcasts">${ICON.out}</a>` : '<span></span>'}
+    </li>`;
+  }
+  function refreshEpButtons() {
+    $$('.ep').forEach(li => {
+      const id = li.dataset.ep;
+      const isCur = nowPlaying && nowPlaying.id === id;
+      const playing = isCur && !audio.paused;
+      li.classList.toggle('playing', !!isCur);
+      const b = $('.ep-play', li);
+      if (!b) return;
+      $('.ic', b).innerHTML = playing ? ICON.pause : ICON.play;
+      const title = $('.ep-title', li).textContent;
+      b.setAttribute('aria-label', `${playing ? 'Pausar' : 'Escuchar'}: ${title}`);
+    });
+  }
+
+  function markLearned(t, text) {
+    const k = dayKey();
+    const prev = S.learned[t.id];
+    if (prev) {
+      prev.note = text;
+      toast('Actualizaste tu frase');
+    } else {
+      S.learned[t.id] = { ...snapshot(t), note: text, at: k, box: 0, due: addDays(k, INTERVALS[0]) };
+      bumpActivity();
+      toast('Aprendido. Vuelve para repasar mañana.');
+    }
+    delete S.drafts[t.id];
+    save();
+    renderTopic(t, currentTopic().src);
+    renderBadge();
+  }
+
+  async function shareTopic(t) {
+    const link = t.kind === 'wiki' && t.url ? t.url : `https://es.wikipedia.org/w/index.php?search=${encodeURIComponent(t.w)}`;
+    const text = `${t.t}: ${t.i}`;
+    try {
+      if (navigator.share) { await navigator.share({ title: t.t, text, url: link }); return; }
+      await navigator.clipboard.writeText(`${text}\n${link}`);
+      toast('Copiado al portapapeles');
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      console.debug('rlw: compartir', e);
+      toast('No se pudo compartir desde este navegador');
+    }
+  }
+
+  function renderPoolInfo() {
+    const f = S.filters;
+    const pool = poolFor(f);
+    const fresh = pool.filter(t => !S.seen[t.id] && !S.learned[t.id]).length;
+    $('#pool-info').textContent = pool.length
+      ? `${plural(pool.length, 'tema', 'temas')} en esta combinación · ${fresh} sin ver · Tema infinito no tiene límite`
+      : 'Ningún tema con esa rareza en esta área: se elige de toda el área.';
+    const areaName = f.area === 'todas' ? 'todas las áreas' : AREAS[f.area].n.toLowerCase();
+    const lv = f.level === '0' ? 'cualquier rareza' : 'rareza ' + LEVELS[+f.level];
+    $('#filters-sum').textContent = `${areaName} · ${lv} · ${f.time} min`;
+  }
+
+  /* ===================== Reproductor ===================== */
+
+  const audio = new Audio();
+  audio.preload = 'metadata';
+  let nowPlaying = null;
+  let lastPosSave = 0;
+  const posKey = id => 'rlw.pos.' + id;
+
+  function playEpisode(e) {
+    if (nowPlaying && nowPlaying.id === e.id) { audio.paused ? audio.play().catch(onPlayError) : audio.pause(); return; }
+    nowPlaying = e;
+    $('#pl-error').hidden = true;
+    audio.src = e.audio;
+    audio.playbackRate = S.rate || 1;
+    let resume = 0;
+    try { resume = +localStorage.getItem(posKey(e.id)) || 0; } catch (err) { console.debug('rlw: posición', err); }
+    audio.addEventListener('loadedmetadata', function once() {
+      audio.removeEventListener('loadedmetadata', once);
+      if (resume > 5 && resume < audio.duration - 10) { audio.currentTime = resume; toast('Seguís desde ' + fmtTime(resume)); }
+    });
+    audio.play().catch(onPlayError);
+    $('#pl-title').textContent = e.t;
+    $('#pl-show').textContent = e.show;
+    $('#player').hidden = false;
+    setPlayerHeight();
+    if ('mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: e.t, artist: e.show, album: 'RLW', artwork: e.art ? [{ src: e.art, sizes:'160x160', type:'image/jpeg' }] : [] });
+      } catch (err) { console.debug('rlw: mediaSession', err); }
+    }
+    refreshEpButtons();
+  }
+  function onPlayError(err) {
+    if (err && err.name === 'AbortError') return;
+    // El navegador bloqueó el inicio automático: queda en pausa hasta que la persona toque reproducir.
+    if (err && err.name === 'NotAllowedError') { refreshEpButtons(); return; }
+    console.debug('rlw: reproducir', err);
+    const e = nowPlaying;
+    if (e && e.audio.startsWith('http:') && !e.triedHttps) {
+      e.triedHttps = true;
+      audio.src = e.audio.replace(/^http:/, 'https:');
+      audio.play().catch(onPlayError);
+      return;
+    }
+    const el = $('#pl-error');
+    el.innerHTML = `No se pudo reproducir este episodio acá.${e && e.page ? ` <a href="${esc(e.page)}" target="_blank" rel="noopener noreferrer">Abrirlo en Apple Podcasts</a>.` : ''}`;
+    el.hidden = false;
+    setPlayerHeight();
+  }
+  audio.addEventListener('error', () => { if (audio.src) onPlayError(audio.error); });
+  audio.addEventListener('play', () => { $('#pl-toggle').innerHTML = ICON.pause; $('#pl-toggle').setAttribute('aria-label', 'Pausar'); refreshEpButtons(); });
+  audio.addEventListener('pause', () => { $('#pl-toggle').innerHTML = ICON.play; $('#pl-toggle').setAttribute('aria-label', 'Reproducir'); refreshEpButtons(); savePos(true); });
+  audio.addEventListener('timeupdate', () => {
+    const d = audio.duration, c = audio.currentTime;
+    $('#pl-cur').textContent = fmtTime(c);
+    $('#pl-dur').textContent = fmtTime(d);
+    if (isFinite(d) && d > 0 && !seeking) $('#pl-seek').value = Math.round(c / d * 1000);
+    savePos(false);
+    if (nowPlaying && isFinite(d) && d > 0 && c / d > 0.8 && !S.listened[nowPlaying.id]) {
+      S.listened[nowPlaying.id] = { t: nowPlaying.t, show: nowPlaying.show, at: dayKey() };
+      bumpActivity();
+      toast('Episodio marcado como escuchado');
+    }
+  });
+  audio.addEventListener('ended', () => { if (nowPlaying) { try { localStorage.removeItem(posKey(nowPlaying.id)); } catch (e) { console.debug('rlw: posición', e); } } });
+  function savePos(force) {
+    if (!nowPlaying) return;
+    const now = Date.now();
+    if (!force && now - lastPosSave < 5000) return;
+    lastPosSave = now;
+    try { localStorage.setItem(posKey(nowPlaying.id), String(Math.floor(audio.currentTime))); } catch (e) { console.debug('rlw: posición', e); }
+  }
+  let seeking = false;
+  const seek = $('#pl-seek');
+  seek.addEventListener('input', () => { seeking = true; if (isFinite(audio.duration)) $('#pl-cur').textContent = fmtTime(seek.value / 1000 * audio.duration); });
+  seek.addEventListener('change', () => { if (isFinite(audio.duration)) audio.currentTime = seek.value / 1000 * audio.duration; seeking = false; });
+  $('#pl-toggle').addEventListener('click', () => { if (!nowPlaying) return; audio.paused ? audio.play().catch(onPlayError) : audio.pause(); });
+  $('#pl-back').addEventListener('click', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
+  $('#pl-fwd').addEventListener('click', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30); });
+  const RATES = [1, 1.25, 1.5, 1.75, 2, 0.8];
+  $('#pl-rate').addEventListener('click', () => {
+    const i = RATES.indexOf(S.rate || 1);
+    S.rate = RATES[(i + 1) % RATES.length];
+    audio.playbackRate = S.rate;
+    $('#pl-rate').textContent = String(S.rate).replace('.', ',') + '×';
+    save();
+  });
+  $('#pl-close').addEventListener('click', () => {
+    savePos(true);
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+    nowPlaying = null;
+    $('#player').hidden = true;
+    setPlayerHeight();
+    refreshEpButtons();
+  });
+  if ('mediaSession' in navigator) {
+    const ms = navigator.mediaSession;
+    const set = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) { console.debug('rlw: acción ' + a, e); } };
+    set('play', () => audio.play().catch(onPlayError));
+    set('pause', () => audio.pause());
+    set('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
+    set('seekforward', () => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 30); });
+  }
+  function setPlayerHeight() {
+    const p = $('#player');
+    document.body.style.setProperty('--player-h', p.hidden ? '0px' : p.offsetHeight + 'px');
+  }
+
+  /* ===================== Render: Repaso ===================== */
+
+  let revealOpen = false;
+  function dueList() {
+    const k = dayKey();
+    return Object.values(S.learned).filter(x => x.due && x.due <= k).sort((a, b) => a.due.localeCompare(b.due));
+  }
+  function boxesHTML(box) {
+    return `<span class="boxes" aria-label="Caja ${Math.min(box + 1, INTERVALS.length)} de ${INTERVALS.length}">${INTERVALS.map((_, i) => `<i class="${i <= box ? 'on' : ''}"></i>`).join('')}</span>`;
+  }
+  function promptFor(rec) {
+    const t = topicFromSnap(rec);
+    if (!t) return `¿Qué recordás de «${rec.t}»?`;
+    if (t.kind === 'wiki') return `¿Qué recordás de «${t.t}»? Explicalo en una frase.`;
+    return t.q[rec.box % t.q.length];
+  }
+  function renderRepaso() {
+    const due = dueList();
+    const area = $('#review-area');
+    if (!due.length) {
+      const next = Object.values(S.learned).filter(x => x.due).sort((a, b) => a.due.localeCompare(b.due))[0];
+      area.innerHTML = `<div class="empty"><b>Nada para repasar hoy</b>${next
+        ? `Próximo repaso: «${esc(next.t)}», el ${esc(fmtDay(next.due, { weekday:'long', day:'numeric', month:'long' }))}.`
+        : 'Cuando marques un tema como aprendido, aparece acá para repasarlo al día siguiente.'}</div>`;
+    } else {
+      const rec = due[0];
+      const t = topicFromSnap(rec);
+      const ctx = t ? t.i : '';
+      area.innerHTML = `<article class="card flash" aria-labelledby="flash-t">
+        <div class="flash-top">${t ? chipHTML(t) : ''}${boxesHTML(rec.box)}<span>caja ${rec.box + 1} de ${INTERVALS.length}</span><span class="count">${plural(due.length, 'pendiente', 'pendientes')}</span></div>
+        <h3 id="flash-t">${esc(rec.t)}</h3>
+        <p class="prompt">${esc(promptFor(rec))}</p>
+        <p class="hint">Respondé en tu cabeza o en voz alta antes de mirar.</p>
+        <div class="reveal" id="reveal" ${revealOpen ? '' : 'hidden'}>
+          <p class="label">Tu frase</p>
+          <p class="mine">${rec.note ? esc(rec.note) : '<i>No escribiste una frase para este tema.</i>'}</p>
+          ${ctx ? `<p class="ctx">${esc(ctx)}</p>` : ''}
+        </div>
+        ${revealOpen ? `<div class="two"><button class="btn" type="button" id="rv-no">No me acordé</button><button class="btn btn-primary" type="button" id="rv-yes">Me acordé</button></div>`
+          : `<button class="btn btn-primary" type="button" id="rv-show">Ver mi frase</button>`}
+        ${t ? `<button class="link-btn" type="button" id="rv-open">Abrir la ficha completa</button>` : ''}
+      </article>`;
+      const sh = $('#rv-show');
+      if (sh) sh.addEventListener('click', () => { revealOpen = true; renderRepaso(); $('#rv-yes').focus(); });
+      const yes = $('#rv-yes'), no = $('#rv-no');
+      if (yes) yes.addEventListener('click', () => answerReview(rec, true));
+      if (no) no.addEventListener('click', () => answerReview(rec, false));
+      const op = $('#rv-open');
+      if (op) op.addEventListener('click', () => { setCurrent(t, 'review'); location.hash = '#hoy'; });
+    }
+
+    const saved = Object.values(S.saved).sort((a, b) => b.at.localeCompare(a.at));
+    $('#saved-list').innerHTML = saved.length
+      ? `<div class="card">${saved.map(s => `<div class="row-item"><div><p class="t">${esc(s.t)}</p><p class="m">${s.kind === 'wiki' ? 'Wikipedia' : esc(AREAS[s.a] ? AREAS[s.a].n : '')} · guardado el ${esc(fmtDay(s.at))}</p></div>
+          <div class="row-actions"><button class="btn btn-sm" type="button" data-open-saved="${esc(s.key)}">Abrir</button><button class="btn btn-sm btn-ghost" type="button" data-del-saved="${esc(s.key)}" aria-label="Quitar ${esc(s.t)} de guardados">Quitar</button></div></div>`).join('')}</div>`
+      : `<div class="empty">Usá “Para después” en una ficha para dejar temas en espera.</div>`;
+
+    const upcoming = Object.values(S.learned).filter(x => x.due && x.due > dayKey()).sort((a, b) => a.due.localeCompare(b.due)).slice(0, 8);
+    $('#upcoming-list').innerHTML = upcoming.length
+      ? `<div class="card">${upcoming.map(u => `<div class="row-item"><div><p class="t">${esc(u.t)}</p><p class="m">${esc(fmtDay(u.due, { weekday:'short', day:'numeric', month:'short' }))} · caja ${u.box + 1} de ${INTERVALS.length}</p></div>${boxesHTML(u.box)}</div>`).join('')}</div>`
+      : `<div class="empty">Todavía no hay repasos agendados.</div>`;
+  }
+  function answerReview(rec, ok) {
+    const k = dayKey();
+    if (ok) {
+      rec.box += 1;
+      rec.due = rec.box >= INTERVALS.length ? null : addDays(k, INTERVALS[rec.box]);
+      toast(rec.due ? `Bien. Vuelve en ${plural(INTERVALS[rec.box], 'día', 'días')}.` : 'Dominado: ya no vuelve al repaso.');
+    } else {
+      rec.box = 0;
+      rec.due = addDays(k, INTERVALS[0]);
+      toast('Vuelve mañana a la primera caja.');
+    }
+    rec.last = k;
+    S.reviews = (S.reviews || 0) + 1;
+    revealOpen = false;
+    bumpActivity();
+    save();
+    renderRepaso();
+    renderBadge();
+  }
+
+  /* ===================== Render: Plan ===================== */
+
+  function currentWeek() {
+    const d = diffDays(S.planStart, dayKey());
+    return d < 0 ? 0 : Math.floor(d / 7) + 1;
+  }
+  function renderPlan() {
+    $('#plan-start').value = S.planStart;
+    const wk = currentWeek();
+    const done = WEEK_IDS.filter(id => S.learned[id]).length;
+    $('#plan-status').textContent = wk === 0
+      ? `Empieza el ${fmtDay(S.planStart, { weekday:'long', day:'numeric', month:'long' })} · ${done} de 12 temas aprendidos`
+      : wk > 12 ? `Plan terminado · ${done} de 12 temas aprendidos. Elegí otra fecha para volver a empezar.`
+      : `Semana ${wk} de 12 · ${done} de 12 temas aprendidos`;
+    $('#plan-meter').style.width = (done / 12 * 100) + '%';
+    $('#weeks').innerHTML = WEEK_IDS.map((id, i) => {
+      const t = TOPIC_BY_ID[id], n = i + 1;
+      const isNow = n === wk, isDone = !!S.learned[id];
+      const status = isDone ? 'aprendido' : isNow ? 'esta semana' : fmtDay(addDays(S.planStart, i * 7));
+      return `<details class="week${isNow ? ' now' : ''}${isDone ? ' done' : ''}"${isNow ? ' open' : ''}>
+        <summary><span class="wk-n">${isDone ? ICON.check : n}</span><span class="wk-t">${esc(t.t)}</span><span class="wk-s">${esc(status)}</span></summary>
+        <div class="wk-body">
+          <p class="q">${esc(t.q[0])}</p>
+          <div class="tags">${t.k.map(x => `<span class="tag">${esc(x)}</span>`).join('')}</div>
+          <p><span class="label">Conexión</span><br>${esc(t.c)}</p>
+          <p><button class="btn btn-sm${isNow && !isDone ? ' btn-primary' : ''}" type="button" data-study="${esc(id)}">Estudiar este tema</button></p>
+        </div>
+      </details>`;
+    }).join('');
+  }
+
+  /* ===================== Render: Progreso ===================== */
+
+  function streakInfo() {
+    const days = Object.keys(S.activity).filter(k => S.activity[k] > 0).sort();
+    let cur = 0, d = dayKey();
+    if (!S.activity[d]) d = addDays(d, -1);
+    while (S.activity[d]) { cur++; d = addDays(d, -1); }
+    let best = 0, run = 0, prev = null;
+    for (const k of days) { run = prev && diffDays(prev, k) === 1 ? run + 1 : 1; best = Math.max(best, run); prev = k; }
+    return { cur, best: Math.max(best, cur) };
+  }
+  function renderStreak() { $('#streak-n').textContent = streakInfo().cur; }
+  function renderBadge() {
+    const n = dueList().length;
+    const b = $('#due-badge');
+    b.hidden = !n;
+    b.textContent = n;
+    b.setAttribute('aria-label', plural(n, 'repaso pendiente', 'repasos pendientes'));
+  }
+  function renderProgreso() {
+    const st = streakInfo();
+    const learned = Object.values(S.learned);
+    const nRev = S.reviews || 0, nEps = Object.keys(S.listened).length;
+    $('#stats').innerHTML = [
+      [st.cur, `${st.cur === 1 ? 'día' : 'días'} de racha (mejor: ${st.best})`],
+      [learned.length, learned.length === 1 ? 'tema aprendido' : 'temas aprendidos'],
+      [nRev, nRev === 1 ? 'repaso hecho' : 'repasos hechos'],
+      [nEps, nEps === 1 ? 'episodio escuchado' : 'episodios escuchados'],
+    ].map(([n, l]) => `<div class="stat"><b>${n}</b><span>${esc(l)}</span></div>`).join('');
+
+    const today = dayKey();
+    const start = addDays(mondayOf(today), -77);
+    let cells = '', active = 0;
+    for (let i = 0; i < 84; i++) {
+      const k = addDays(start, i);
+      const v = S.activity[k] || 0;
+      if (v) active++;
+      const lv = !v ? '' : v === 1 ? 'l1' : v <= 3 ? 'l2' : 'l3';
+      const future = k > today;
+      cells += `<i class="${lv}${k === today ? ' today' : ''}" title="${esc(fmtDay(k))}: ${future ? '—' : plural(v, 'actividad', 'actividades')}"${future ? ' style="opacity:.35"' : ''}></i>`;
+    }
+    const heat = $('#heat');
+    heat.innerHTML = cells;
+    heat.setAttribute('aria-label', `${plural(active, 'día', 'días')} con actividad en las últimas 12 semanas`);
+
+    const counts = {};
+    learned.forEach(x => { counts[x.a] = (counts[x.a] || 0) + 1; });
+    const untouched = Object.keys(AREAS).filter(a => !counts[a]);
+    $('#areas-hint').textContent = untouched.length
+      ? `Sin explorar todavía: ${untouched.map(a => AREAS[a].n).join(', ')}.`
+      : 'Ya exploraste todas las áreas.';
+    $('#areas').innerHTML = Object.entries(AREAS).map(([id, A]) => {
+      const total = TOPICS.filter(t => t.a === id).length, n = counts[id] || 0;
+      return `<div class="bar" style="--h:${A.h}"><span class="nm">${esc(A.n)}</span><span class="tr"><span style="width:${(n / total * 100).toFixed(1)}%"></span></span><span class="ct">${n}/${total}</span></div>`;
+    }).join('') + (counts.wiki ? `<div class="bar" style="--h:40"><span class="nm">Wikipedia</span><span class="tr"><span style="width:100%"></span></span><span class="ct">${counts.wiki}</span></div>` : '');
+
+    const hist = learned.slice().sort((a, b) => b.at.localeCompare(a.at) || a.t.localeCompare(b.t));
+    $('#history').innerHTML = hist.length
+      ? hist.map(h => `<div class="row-item"><div><p class="t">${esc(h.t)}</p><p class="m">${h.kind === 'wiki' ? 'Wikipedia' : esc(AREAS[h.a] ? AREAS[h.a].n : '')} · ${esc(fmtDay(h.at))} · ${h.due ? 'repaso ' + esc(fmtDay(h.due)) : 'dominado'}</p>${h.note ? `<p class="n">“${esc(h.note)}”</p>` : ''}</div>
+          <button class="btn btn-sm" type="button" data-open-learned="${esc(h.key)}">Abrir</button></div>`).join('')
+      : `<div class="empty">Acá van a quedar tus temas con la frase que escribiste para cada uno.</div>`;
+    syncSettings();
+  }
+  function syncSettings() {
+    $$('input[name="o-lang"]').forEach(r => { r.checked = r.value === S.langs; });
+    $$('input[name="o-theme"]').forEach(r => { r.checked = r.value === S.theme; });
+  }
+
+  /* ===================== Tema visual ===================== */
+
+  const THEME_NAMES = { system:'según el sistema', light:'claro', dark:'oscuro' };
+  function applyTheme() {
+    const r = document.documentElement;
+    if (S.theme === 'system') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', S.theme);
+    const b = $('#theme-btn');
+    b.innerHTML = ICON[S.theme];
+    b.setAttribute('aria-label', `Tema: ${THEME_NAMES[S.theme]}. Tocá para cambiar.`);
+    const dark = S.theme === 'dark' || (S.theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+    $$('meta[name="theme-color"]').forEach(m => { m.content = dark ? '#171614' : '#f7f6f2'; });
+  }
+
+  /* ===================== Navegación ===================== */
+
+  const VIEWS = ['hoy', 'repaso', 'plan', 'progreso'];
+  function route() {
+    const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'hoy';
+    VIEWS.forEach(x => { $('#view-' + x).hidden = x !== v; });
+    $$('.tabbar a').forEach(a => { if (a.dataset.view === v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    if (v === 'hoy') renderHoy();
+    if (v === 'repaso') renderRepaso();
+    if (v === 'plan') renderPlan();
+    if (v === 'progreso') renderProgreso();
+    renderBadge();
+    renderStreak();
+    window.scrollTo(0, 0);
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    const el = $('#toast');
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+  }
+
+  /* ===================== Eventos ===================== */
+
+  function showNew(topic, src) {
+    setCurrent(topic, src);
+    if (location.hash !== '#hoy' && location.hash !== '') { location.hash = '#hoy'; return; }
+    renderTopic(topic, src);
+    $('#ficha-title').focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }
+
+  $('#btn-next').addEventListener('click', () => {
+    const cur = currentTopic().topic;
+    showNew(pickTopic(S.filters, cur.id), 'random');
+  });
+  $('#btn-wild').addEventListener('click', () => {
+    const cur = currentTopic().topic;
+    showNew(pickTopic({ area:'todas', level:'0' }, cur.id), 'wild');
+  });
+  $('#btn-wiki').addEventListener('click', async e => {
+    const b = e.currentTarget;
+    b.disabled = true;
+    const label = b.innerHTML;
+    b.innerHTML = 'Buscando…<small>Wikipedia</small>';
+    try { showNew(await wikiRandomTopic(), 'wiki'); }
+    catch (err) { console.debug('rlw: wikipedia', err); toast('No se pudo traer un artículo. Revisá la conexión.'); }
+    finally { b.disabled = false; b.innerHTML = label; }
+  });
+  $('#btn-daily').addEventListener('click', () => { S.current = null; save(); renderHoy(); });
+
+  const areaSel = $('#f-area');
+  areaSel.innerHTML = `<option value="todas">Todas las áreas</option>` + Object.entries(AREAS).map(([k, A]) => `<option value="${k}">${esc(A.n)}</option>`).join('');
+  areaSel.addEventListener('change', () => { S.filters.area = areaSel.value; save(); renderPoolInfo(); });
+  $('#f-level').addEventListener('change', e => { S.filters.level = e.target.value; save(); renderPoolInfo(); });
+  $$('input[name="f-time"]').forEach(r => r.addEventListener('change', () => {
+    S.filters.time = r.value; save();
+    const { topic, src } = currentTopic();
+    renderTopic(topic, src);
+  }));
+
+  document.addEventListener('click', e => {
+    const playBtn = e.target.closest('[data-play]');
+    if (playBtn) { const ep = epMap.get(playBtn.dataset.play); if (ep) playEpisode(ep); return; }
+    const study = e.target.closest('[data-study]');
+    if (study) { showNew(TOPIC_BY_ID[study.dataset.study], 'plan'); return; }
+    const os = e.target.closest('[data-open-saved]');
+    if (os) { const t = topicFromSnap(S.saved[os.dataset.openSaved]); if (t) showNew(t, 'saved'); return; }
+    const ds = e.target.closest('[data-del-saved]');
+    if (ds) { delete S.saved[ds.dataset.delSaved]; save(); renderRepaso(); return; }
+    const ol = e.target.closest('[data-open-learned]');
+    if (ol) { const t = topicFromSnap(S.learned[ol.dataset.openLearned]); if (t) showNew(t, 'history'); }
+  });
+
+  $('#plan-start').addEventListener('change', e => { if (e.target.value) { S.planStart = e.target.value; save(); renderPlan(); } });
+
+  $('#theme-btn').addEventListener('click', () => {
+    S.theme = { system:'light', light:'dark', dark:'system' }[S.theme] || 'system';
+    save(); applyTheme(); syncSettings();
+  });
+  $$('input[name="o-theme"]').forEach(r => r.addEventListener('change', () => { S.theme = r.value; save(); applyTheme(); }));
+  $$('input[name="o-lang"]').forEach(r => r.addEventListener('change', () => { S.langs = r.value; save(); }));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+  $('#btn-export').addEventListener('click', () => {
+    saveNow();
+    const blob = new Blob([JSON.stringify(S, null, 2)], { type:'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `rlw-progreso-${dayKey()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
+  $('#btn-import').addEventListener('click', () => $('#import-file').click());
+  $('#import-file').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const inc = JSON.parse(rd.result);
+        if (!inc || inc.v !== 2 || typeof inc.learned !== 'object') throw new Error('formato');
+        for (const m of ['learned', 'saved', 'seen', 'listened', 'drafts']) {
+          for (const [k, v] of Object.entries(inc[m] || {})) if (!S[m][k]) S[m][k] = v;
+        }
+        for (const [k, v] of Object.entries(inc.activity || {})) S.activity[k] = Math.max(S.activity[k] || 0, +v || 0);
+        S.reviews = Math.max(S.reviews || 0, inc.reviews || 0);
+        saveNow();
+        toast('Copia importada');
+        route();
+      } catch (err) { console.debug('rlw: importar', err); toast('Ese archivo no es una copia de RLW'); }
+      e.target.value = '';
+    };
+    rd.readAsText(f);
+  });
+  let resetArmed = null;
+  $('#btn-reset').addEventListener('click', e => {
+    const b = e.currentTarget;
+    if (!resetArmed) {
+      b.textContent = 'Tocá de nuevo para borrar todo';
+      b.style.color = 'var(--danger)';
+      resetArmed = setTimeout(() => { resetArmed = null; b.textContent = 'Borrar todo'; b.style.color = ''; }, 4000);
+      return;
+    }
+    clearTimeout(resetArmed); resetArmed = null;
+    S = defaultState();
+    saveNow();
+    purgeCache();
+    b.textContent = 'Borrar todo'; b.style.color = '';
+    applyTheme();
+    toast('Progreso borrado');
+    route();
+  });
+
+  window.addEventListener('hashchange', route);
+  window.addEventListener('resize', setPlayerHeight);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { savePos(true); saveNow(); }
+    else if (S.daily.date !== dayKey()) route();
+  });
+  window.addEventListener('pagehide', () => { savePos(true); saveNow(); });
+
+  /* ===================== Inicio ===================== */
+
+  $$('input[name="f-time"]').forEach(r => { r.checked = r.value === S.filters.time; });
+  areaSel.value = S.filters.area;
+  $('#f-level').value = S.filters.level;
+  $('#pl-toggle').innerHTML = ICON.play;
+  $('#pl-rate').textContent = String(S.rate || 1).replace('.', ',') + '×';
+  applyTheme();
+  route();
+  setTimeout(pruneCache, 3000);
+  </script>
+</body>
+</html>
